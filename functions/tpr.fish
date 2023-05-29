@@ -20,6 +20,11 @@ function __tpr_main_tex
 end
 
 
+function __tpr_compile --argument texfile
+    latexmk -pdf -interaction=nonstopmode -silent -Werror -file-line-error -cd $texfile > /dev/null
+end
+
+
 function __tpr_make_tempdir --description "archive the current directory to a temporary tarfile" --argument commit
     set --function temp_dir (mktemp --directory)
     trap "rm -rf $temp_dir" INT TERM HUP EXIT
@@ -29,12 +34,12 @@ function __tpr_make_tempdir --description "archive the current directory to a te
 
     if test -z "$commit"
         # if no commit is provided, populate $tarfile with current contents
-        if not git ls-files -z | xargs -0 tar -cvf $tarfile 2>&1 /dev/null
+        if not git ls-files -z | xargs -0 tar -cf $tarfile
             return 1
         end
     else
         # otherwise, use `git archive` to dump to $tarfile
-        if not git archive --format=tar $commit > $tarfile 2> /dev/null
+        if not git archive --format=tar $commit --output $tarfile
             return 1
         end
     end
@@ -89,7 +94,7 @@ function tpr --description 'Initialize LaTeX project repositories' --argument co
 
         case remote
             set --local REPONAME $argv[2]
-            if git config --get remote.origin.url &> /dev/null
+            if git config --get remote.origin.url
                 __tpr_FAIL "remote 'origin' already exists"; return 1
             end
 
@@ -124,12 +129,12 @@ function tpr --description 'Initialize LaTeX project repositories' --argument co
 
             if test -z "$COMMIT"
                 # if no commit is provided, populate $tarfile with current contents
-                if not git ls-files -z | xargs -0 tar -czvf $GZ 2>&1 /dev/null
+                if not git ls-files -z | xargs -0 tar -czf $GZ
                     return 1
                 end
             else
                 # otherwise, use `git archive` to dump to $tarfile
-                if not git archive --format=tar.gz $COMMIT > $GZ 2> /dev/null
+                if not git archive --format=tar.gz $COMMIT --output $GZ
                     return 1
                 end
             end
@@ -151,7 +156,7 @@ function tpr --description 'Initialize LaTeX project repositories' --argument co
                 __tpr_FAIL "failed to generate archive"; return 1
             end
 
-            latexmk -pdf -interaction=nonstopmode -silent -Werror -file-line-error -cd $temp_dir/$main_tex 2>&1 /dev/null
+            __tpr_compile $temp_dir/$main_tex
 
 
         case build
@@ -175,8 +180,9 @@ function tpr --description 'Initialize LaTeX project repositories' --argument co
                 __tpr_FAIL "failed to generate archive"; return 1
             end
 
-            latexmk -pdf -interaction=nonstopmode -silent -Werror -file-line-error -cd $temp_dir/$main_tex
+            __tpr_compile $temp_dir/$main_tex
             and mv -i (path change-extension pdf $temp_dir/$main_tex) $PDF
+
 
 
         case '*'
