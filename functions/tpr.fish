@@ -68,6 +68,7 @@ function tpr --description 'Initialize LaTeX project repositories' --argument co
             echo '       tpr build PDF [COMMIT]   Compile and output to PDF'
             echo '                                  COMMIT: use commit'
             echo '       tpr list                 List available templates'
+            echo '       tpr update               Update the existing templates'
 
 
         case init
@@ -181,6 +182,9 @@ function tpr --description 'Initialize LaTeX project repositories' --argument co
             __tpr_compile $temp_dir/$main_tex
             and mv -i (path change-extension pdf $temp_dir/$main_tex) $PDF
 
+
+        case update
+            copier update
 
 
         case '*'
