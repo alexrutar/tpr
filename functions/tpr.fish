@@ -92,6 +92,12 @@ function tpr --description 'Initialize LaTeX project repositories' --argument co
             and git add -A
             and git commit -m "Initialize new project repository."
 
+            set --local commit_file $XDG_DATA_HOME/tpr/pre-commit
+            if test -f "$commit_file"
+                cp $commit_file .git/hooks/pre-commit
+            end
+
+
 
         case remote
             set --local REPONAME $argv[2]
