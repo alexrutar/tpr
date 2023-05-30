@@ -98,16 +98,14 @@ function tpr --description 'Initialize LaTeX project repositories' --argument co
                 __tpr_FAIL "remote 'origin' already exists"; return 1
             end
 
-            if test -z "$template"
+            if test -z "$REPONAME"
                 __tpr_FAIL "missing remote repository name"; return 1
             end
 
-            set --local reponame "rutar-academic/$template"
-
-            read -l -P "Create repository '$reponame'? [y/N] " confirm
+            read -l -P "Create repository '$REPONAME'? [y/N] " confirm
             switch $confirm
                 case Y y
-                    gh repo create $reponame --remote origin --source . --disable-issues --disable-wiki --private --push --homepage "https://rutar.org"
+                    gh repo create $REPONAME --remote origin --source . --disable-issues --disable-wiki --private --push --homepage "https://rutar.org"
                     return 0
                 case '*'
                     return 1
