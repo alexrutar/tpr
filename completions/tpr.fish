@@ -11,4 +11,4 @@ complete --command tpr --exclusive --condition "not __fish_seen_subcommand_from 
 complete --command tpr --exclusive --condition "not __fish_seen_subcommand_from $tpr_subcommands" --arguments list --description "List available templates"
 
 complete --command tpr --exclusive --condition "__fish_seen_subcommand_from init" --arguments "(tpr list)" 
-complete --command tpr --exclusive --condition "__fish_seen_subcommand_from build archive" --arguments "(__fish_complete_directories)"
+complete --command tpr --exclusive --condition "__fish_seen_subcommand_from build archive" --arguments "(__fish_complete_path '' '')"
