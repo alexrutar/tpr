@@ -32,12 +32,15 @@ end
 
 __tpr_test help list
 __tpr_test list
-__tpr_test install
+__tpr_test install "test-preprint" https://github.com/rutar-academic/template-preprint
+__tpr_test list
 __tpr_test init preprint
 __tpr_test archive out.tar.gz
 __tpr_test validate
 __tpr_test build out.pdf
-__tpr_test init preprint
+__tpr_test update
+__tpr_test pull
+__tpr_test uninstall "test-preprint"
 ls -A
 
 # CLEANUP
