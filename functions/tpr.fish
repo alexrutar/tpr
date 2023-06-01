@@ -51,34 +51,77 @@ function __tpr_make_tempdir --description "archive the current directory to a te
 end
 
 
-function __tpr_list_templates --argument template_file
-    echo (awk '{print $1}' $template_file)
+function __tpr_list_templates --argument template_directory
+    if not path basename $template_directory/*
+        return 0
+    end
 end
+
 
 function __tpr_help --argument cmd
     switch $cmd
         case ''
-            echo 'Usage: tpr init TEMPLATE        Create new project from TEMPLATE'
-            echo '       tpr remote REPONAME      Create a remote repository'
-            echo '       tpr archive GZ [COMMIT]  Export files to GZ'
-            echo '                                  COMMIT: use commit'
-            echo '       tpr validate             Verify compilation'
-            echo '       tpr build PDF [COMMIT]   Compile and output to PDF'
-            echo '                                  COMMIT: use commit'
-            echo '       tpr list                 List available templates'
-            echo '       tpr update               Update the existing templates'
-            echo '       tpr install              Install available templates'
+            echo 'Usage: tpr init TEMPLATE         Create new project from TEMPLATE'
+            echo '       tpr list                  List available templates'
+            echo '       tpr validate              Verify compilation'
+            echo '       tpr build PDF [COMMIT]    Compile and output to PDF'
+            echo '                                   COMMIT: use commit'
+            echo '       tpr archive GZ [COMMIT]   Export files to GZ'
+            echo '                                   COMMIT: use commit'
+            echo '       tpr remote REPONAME       Create a remote repository'
+            echo '       tpr pull                  Update the existing templates'
+            echo '       tpr install [NAME] [GIT]  Install new template'
             echo
             echo 'Run `tpr help [subcommand]` for more information on each'
             echo 'subcommand, or visit https://github.com/alexrutar/tpr for more'
             echo 'detailed information.'
 
+        case validate
+            echo 'Usage: tpr validate'
+            echo
+            echo '  Compile tex file specified with .latexmain in the current directory'
+            echo '  and check for errors. The command used is'
+            echo
+            echo '  > latexmk -pdf -interaction=nonstopmode -silent -Werror'
+
+        case init
+            echo 'Usage: tpr init TEMPLATE'
+            echo
+            echo '  Create a new project in the current directory from TEMPLATE.'
+            echo '  For information about template specification and installation,'
+            echo '  run `tpr help install`.'
+            echo
+
+        case install
+            echo 'Usage: tpr install [NAME] [GIT]'
+            echo
+            echo '  Install new templates with name NAME from the git repository GIT.'
+            echo '  This is an error if the template already exists: to update, run'
+            echo '  `tpr update`, and to remote a template, run `tpr remove-template`.'
+            echo
+            echo '  Templates for the project are rendered using copier. See'
+            echo
+            echo '    https://copier.readthedocs.io/en/stable/.'
+            echo
+            echo '  for more details about template creation.'
+
         case list
             echo 'Usage: tpr list'
             echo
-            echo '  List all available templates. Note that this also lists'
-            echo '  templates that have not yet been installed. Install or'
-            echo '  update templates with `tpr install`.'
+            echo '  List all available templates. Note that this only lists'
+            echo '  templates that been installed. Install or update templates'
+            echo '  with `tpr install`.'
+
+        case remote
+            echo 'Usage: tpr remote REPONAME'
+            echo
+            echo '  Create a new private remote GitHub repository with name'
+            echo '  REPONAME. REPONAME is an identifier of the form username/repo.'
+            echo
+            echo 'Example usage:'
+            echo
+            echo '  Create a new private repository at alexrutar/test-repo.'
+            echo '  > tpr remote alexrutar/test-repo'
 
         case '*'
             __tpr_FAIL "Invalid subcommand '$argv[2]'"; return 1
@@ -90,12 +133,14 @@ function tpr --description 'Initialize LaTeX project repositories' --argument co
     set --function tpr_version 0.2
 
     set --function tpr_data_dir $XDG_DATA_HOME/tpr
+    set --function tpr_config_dir $XDG_CONFIG_HOME/tpr
+
     mkdir --parents $tpr_data_dir
+    mkdir --parents $tpr_config_dir
 
     set --function tpr_resource_dir $tpr_data_dir/resources
-    set --function tpr_template_list $tpr_data_dir/templates.txt
     set --function tpr_template_dir $tpr_data_dir/templates
-
+    set --function tpr_config_file $tpr_config_dir/config.toml
 
     switch $command
         case -v --version
@@ -111,18 +156,47 @@ function tpr --description 'Initialize LaTeX project repositories' --argument co
 
 
         case install
-            for line in (cat $tpr_template_list)
-                set --local split_line (string split ' ' $line)
-                set --local repo_dir $tpr_template_dir/$split_line[1]
+            set --local NAME $argv[2]
+            set --local GIT $argv[3]
 
-                if git -C $repo_dir pull &> /dev/null
-                    echo "Updating template '$split_line[1]'..."
-                else
-                    echo "Installing new template from '$split_line[2]'..."
-                    git clone $split_line[2] $repo_dir &> /dev/null
-                    or __tpr_FAIL "Failed to install template '$split_line[1]'"
-                end
+            if not test (count $argv) -eq 3
+                __tpr_FAIL "incorrect number of arguments"; return 1
             end
+
+            set --local matched_name (string match --regex '[a-zA-Z0-9_\-]+' $NAME)
+
+            if not test "$matched_name" = "$NAME"
+                __tpr_FAIL "Invalid template name!"; return 1
+            end
+
+            if test -e "$tpr_template_dir/$NAME"
+                __tpr_FAIL "Template with name $NAME already installed!"; return 1
+            end
+
+            git clone $GIT "$tpr_template_dir/$NAME" > /dev/null
+
+
+        case uninstall
+            set --local NAME $argv[2]
+
+            set --local matched_name (string match --regex '[a-zA-Z0-9_\-]+' $NAME)
+
+            if not test "$matched_name" = "$NAME"
+                __tpr_FAIL "Invalid template name!"; return 1
+            end
+
+            if test -e "$tpr_template_dir/$NAME"
+                rm -rf $tpr_template_dir/$NAME
+            end
+
+
+        case update
+            for file in $tpr_template_dir/*
+                fish --command "git -C $file pull" &
+                set --append pid_list (jobs --last --pid)
+            end
+
+            wait $pid_list 2>/dev/null
 
 
         case init
@@ -136,7 +210,7 @@ function tpr --description 'Initialize LaTeX project repositories' --argument co
 
             set --local TEMPLATE $argv[2]
 
-            set --function available_templates (__tpr_list_templates $tpr_template_list)
+            set --function available_templates (__tpr_list_templates $tpr_template_dir)
             if not contains $TEMPLATE $available_templates
                 __tpr_FAIL "Invalid template '$TEMPLATE'"; return 1
             end
@@ -164,18 +238,16 @@ function tpr --description 'Initialize LaTeX project repositories' --argument co
                 __tpr_FAIL "missing remote repository name"; return 1
             end
 
-            read -l -P "Create repository '$REPONAME'? [y/N] " confirm
-            switch $confirm
-                case Y y
-                    gh repo create $REPONAME --remote origin --source . --disable-issues --disable-wiki --private --push --homepage "https://rutar.org"
-                    return 0
-                case '*'
-                    return 1
+            set --function homepage (yq '.homepage' $tpr_config_file)
+            if test -n "$homepage"
+                set --function homepage_cmd --homepage $homepage
             end
+
+            gh repo create $REPONAME --remote origin --source . --disable-issues --disable-wiki --private --push $homepage_cmd
 
 
         case list
-            __tpr_list_templates $tpr_template_list
+            __tpr_list_templates $tpr_template_dir
 
 
         case archive
@@ -198,7 +270,6 @@ function tpr --description 'Initialize LaTeX project repositories' --argument co
                     return 1
                 end
             end
-
 
 
         case validate
@@ -244,7 +315,7 @@ function tpr --description 'Initialize LaTeX project repositories' --argument co
             and mv -i (path change-extension pdf $temp_dir/$main_tex) $PDF
 
 
-        case update
+        case pull
             copier update
 
 
