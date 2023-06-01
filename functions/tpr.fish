@@ -61,28 +61,63 @@ end
 function __tpr_help --argument cmd
     switch $cmd
         case ''
-            echo 'Usage: tpr init TEMPLATE         Create new project from TEMPLATE'
-            echo '       tpr list                  List available templates'
-            echo '       tpr validate              Verify compilation'
-            echo '       tpr build PDF [COMMIT]    Compile and output to PDF'
-            echo '                                   COMMIT: use commit'
-            echo '       tpr archive GZ [COMMIT]   Export files to GZ'
-            echo '                                   COMMIT: use commit'
-            echo '       tpr remote REPONAME       Create a remote repository'
-            echo '       tpr pull                  Update the existing templates'
-            echo '       tpr install [NAME] [GIT]  Install new template'
+            echo 'Usage: tpr init TEMPLATE        Create new project from TEMPLATE'
+            echo '       tpr list                 List available templates'
+            echo '       tpr validate [COMMIT]    Verify compilation'
+            echo '       tpr build PDF [COMMIT]   Compile and output to PDF'
+            echo '                                  COMMIT: use commit'
+            echo '       tpr archive GZ [COMMIT]  Export files to GZ'
+            echo '                                  COMMIT: use commit'
+            echo '       tpr remote REPONAME      Create a remote repository'
+            echo '       tpr pull                 Update the existing templates'
+            echo '       tpr install NAME GIT     Install new template'
             echo
             echo 'Run `tpr help [subcommand]` for more information on each'
             echo 'subcommand, or visit https://github.com/alexrutar/tpr for more'
             echo 'detailed information.'
 
+        case list
+            echo 'Usage: tpr list'
+            echo
+            echo '  List all available templates. Note that this only lists'
+            echo '  templates that been installed. Install or update templates'
+            echo '  with `tpr install`.'
+
         case validate
             echo 'Usage: tpr validate'
             echo
-            echo '  Compile tex file specified with .latexmain in the current directory'
-            echo '  and check for errors. The command used is'
+            echo '  Compile tex file specified with .latexmain in the current'
+            echo '  directory and check for errors. The command used is'
             echo
             echo '  > latexmk -pdf -interaction=nonstopmode -silent -Werror'
+            echo
+            echo '  If COMMIT is given, use the commit specified by COMMIT.'
+            echo '  The COMMIT argument is used as the argument to'
+            echo '  `git archive`'
+
+        case archive
+            echo '       tpr archive GZ [COMMIT]  Export files to GZ'
+            echo '                                  COMMIT: use commit'
+            echo
+            echo '  Export files in the current repository as a g-zipped archive'
+            echo '  to the file specified with GZ. The export respects'
+            echo '  your .gitignore.'
+            echo
+            echo '  If COMMIT is given, use the commit specified by COMMIT.'
+            echo '  The COMMIT argument is used as the argument to'
+            echo '  `git archive`'
+
+        case build
+            echo 'Usage: tpr build PDF'
+            echo
+            echo '  Compile tex file specified with .latexmain in the current directory'
+            echo '  and check for errors. Output the compiled file to PDF.'
+            echo
+            echo '  > latexmk -pdf -interaction=nonstopmode -silent -Werror'
+            echo
+            echo '  If COMMIT is given, use the commit specified by COMMIT.'
+            echo '  The COMMIT argument is used as the argument to'
+            echo '  `git archive`'
 
         case init
             echo 'Usage: tpr init TEMPLATE'
@@ -104,13 +139,6 @@ function __tpr_help --argument cmd
             echo '    https://copier.readthedocs.io/en/stable/.'
             echo
             echo '  for more details about template creation.'
-
-        case list
-            echo 'Usage: tpr list'
-            echo
-            echo '  List all available templates. Note that this only lists'
-            echo '  templates that been installed. Install or update templates'
-            echo '  with `tpr install`.'
 
         case remote
             echo 'Usage: tpr remote REPONAME'
