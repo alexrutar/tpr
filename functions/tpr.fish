@@ -58,23 +58,33 @@ function __tpr_list_templates --argument template_directory
 end
 
 
+# also add files with tpr archive GZ --pdf --bbl ...?
 function __tpr_help --argument cmd
     switch $cmd
         case ''
-            echo 'Usage: tpr init TEMPLATE        Create new project from TEMPLATE'
-            echo '       tpr list                 List available templates'
-            echo '       tpr validate [COMMIT]    Verify compilation'
-            echo '       tpr build PDF [COMMIT]   Compile and output to PDF'
-            echo '                                  COMMIT: use commit'
-            echo '       tpr archive GZ [COMMIT]  Export files to GZ'
-            echo '                                  COMMIT: use commit'
-            echo '       tpr remote REPONAME      Create a remote repository'
-            echo '       tpr pull                 Update the existing templates'
-            echo '       tpr install NAME GIT     Install new template'
+            echo 'Usage: tpr init TEMPLATE         Create new project from TEMPLATE'
+            echo '       tpr list                  List available templates'
+            echo '       tpr compile PDF [COMMIT]  Compile and output to PDF'
+            echo '                                   COMMIT: use commit'
+            echo '       tpr validate [COMMIT]     Verify compilation'
+            echo '                                   COMMIT: use commit'
+            echo '       tpr archive GZ [COMMIT]   Export files to GZ'
+            echo '                                   COMMIT: use commit'
+            echo '       tpr remote REPONAME       Create a remote repository'
+            echo '       tpr pull                  Update existing project'
+            echo '       tpr install NAME GIT      Install new template'
             echo
             echo 'Run `tpr help [subcommand]` for more information on each'
             echo 'subcommand, or visit https://github.com/alexrutar/tpr for more'
             echo 'detailed information.'
+
+        case init
+            echo 'Usage: tpr init TEMPLATE'
+            echo
+            echo '  Create a new project in the current directory from TEMPLATE.'
+            echo '  For information about template specification and installation,'
+            echo '  run `tpr help install`.'
+            echo
 
         case list
             echo 'Usage: tpr list'
@@ -82,6 +92,18 @@ function __tpr_help --argument cmd
             echo '  List all available templates. Note that this only lists'
             echo '  templates that been installed. Install or update templates'
             echo '  with `tpr install`.'
+
+        case compile
+            echo 'Usage: tpr compile PDF'
+            echo
+            echo '  Compile tex file specified with .latexmain in the current directory'
+            echo '  and check for errors. Output the compiled file to PDF.'
+            echo
+            echo '  > latexmk -pdf -interaction=nonstopmode -silent -Werror'
+            echo
+            echo '  If COMMIT is given, use the commit specified by COMMIT.'
+            echo '  The COMMIT argument is used as the argument to'
+            echo '  `git archive`'
 
         case validate
             echo 'Usage: tpr validate'
@@ -107,25 +129,16 @@ function __tpr_help --argument cmd
             echo '  The COMMIT argument is used as the argument to'
             echo '  `git archive`'
 
-        case build
-            echo 'Usage: tpr build PDF'
+        case remote
+            echo 'Usage: tpr remote REPONAME'
             echo
-            echo '  Compile tex file specified with .latexmain in the current directory'
-            echo '  and check for errors. Output the compiled file to PDF.'
+            echo '  Create a new private remote GitHub repository with name'
+            echo '  REPONAME. REPONAME is an identifier of the form username/repo.'
             echo
-            echo '  > latexmk -pdf -interaction=nonstopmode -silent -Werror'
+            echo 'Example usage:'
             echo
-            echo '  If COMMIT is given, use the commit specified by COMMIT.'
-            echo '  The COMMIT argument is used as the argument to'
-            echo '  `git archive`'
-
-        case init
-            echo 'Usage: tpr init TEMPLATE'
-            echo
-            echo '  Create a new project in the current directory from TEMPLATE.'
-            echo '  For information about template specification and installation,'
-            echo '  run `tpr help install`.'
-            echo
+            echo '  Create a new private repository at alexrutar/test-repo.'
+            echo '  > tpr remote alexrutar/test-repo'
 
         case install
             echo 'Usage: tpr install [NAME] [GIT]'
@@ -140,16 +153,10 @@ function __tpr_help --argument cmd
             echo
             echo '  for more details about template creation.'
 
-        case remote
-            echo 'Usage: tpr remote REPONAME'
+        case pull
+            echo 'Usage: tpr pull'
             echo
-            echo '  Create a new private remote GitHub repository with name'
-            echo '  REPONAME. REPONAME is an identifier of the form username/repo.'
-            echo
-            echo 'Example usage:'
-            echo
-            echo '  Create a new private repository at alexrutar/test-repo.'
-            echo '  > tpr remote alexrutar/test-repo'
+            echo '  Apply upstream template changes to the current project.'
 
         case '*'
             __tpr_FAIL "Invalid subcommand '$argv[2]'"; return 1
@@ -318,7 +325,7 @@ function tpr --description 'Initialize LaTeX project repositories' --argument co
             __tpr_compile $temp_dir/$main_tex
 
 
-        case build
+        case compile
             # get and validate main.tex
             set --local main_tex (__tpr_main_tex)
             if not test -f "$main_tex"
