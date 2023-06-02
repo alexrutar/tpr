@@ -1,10 +1,14 @@
 # LaTeX Project Manager
+TexProject is a LaTeX project manager that performs basic project templating and also includes other utilities for compiling and exporting your files in a well-defined way.
+
 ## Installation
 If you have something like [fisher](https://github.com/jorgebucaran/fisher), you can
 ```
 fisher install alexrutar/tpr
 ```
 Otherwise, the function is in [functions/tpr.fish](functions/tpr.fish) and the completions are in [completions/tpr.fish](completions/tpr.fish) and you can just copy them to the relevant folders.
+
+## Basic usage
 
 ### Dependencies
 In order to use `tpr`, you need a few dependencies.
