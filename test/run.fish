@@ -37,9 +37,10 @@ __tpr_test list
 __tpr_test init preprint
 __tpr_test archive out.tar.gz
 __tpr_test validate
-__tpr_test build out.pdf
+__tpr_test compile out.pdf
 __tpr_test update
 __tpr_test pull
+__tpr_test validate
 __tpr_test uninstall "test-preprint"
 ls -A
 
