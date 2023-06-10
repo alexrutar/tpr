@@ -5,12 +5,13 @@ function __tpr_FAIL --argument message
 end
 
 
-function __tpr_main_tex
+function __tpr_main_tex --argument tpr_working_dir
     # get the main tex file, and ensure it exists and has the expected extension
-    set --local main_tex (path change-extension '' *.latexmain | head -n 1)
+    set --local main_tex_relative (path change-extension '' $tpr_working_dir/*.latexmain | head -n 1)
+    set --local main_tex (path basename $main_tex_relative)
     set --local main_tex_extension (path extension $main_tex)
 
-    if not test -f $main_tex
+    if not test -f $main_tex_relative
         return 1
     end
     
@@ -26,26 +27,26 @@ function __tpr_compile --argument texfile
 end
 
 
-function __tpr_make_tempdir --description "archive the current directory to a temporary tarfile" --argument commit
+function __tpr_make_tempdir --description "archive the current directory to a temporary tarfile" --argument tpr_working_dir commit
     set --function temp_dir (mktemp --directory)
     trap "rm -rf $temp_dir" INT TERM HUP EXIT
 
     set --local tarfile (mktemp)
     trap "rm -f $tarfile" INT TERM HUP EXIT
 
-    if not git rev-parse --is-inside-work-tree 2> /dev/null
+    if not git -C $tpr_working_dir rev-parse --is-inside-work-tree 2> /dev/null >/dev/null
         # if not a git directory, just recursively list to generate tarfile
-        if not ls -t --ignore="*."{aux} | xargs tar -rf $tarfile
+        if not ls -Rt --ignore="*."{aux} $tpr_working_dir | xargs tar -rf $tarfile -C $tpr_working_dir
             return 1
         end
-    else if test -z "$commit"
+    else if test -z "$commit" >/dev/null
         # if no commit is provided, populate $tarfile with current contents
-        if not git ls-files -z | xargs -0 tar -cf $tarfile
+        if not git -C $tpr_working_dir ls-files -z | xargs -0 tar -cf $tarfile -C $tpr_working_dir
             return 1
         end
     else
         # otherwise, use `git archive` to dump to $tarfile
-        if not git archive --format=tar $commit --output $tarfile
+        if not git -C $tpr_working_dir archive --format=tar $commit --output $tarfile
             return 1
         end
     end
@@ -170,10 +171,45 @@ end
 
 
 function tpr --description 'Initialize LaTeX project repositories' --argument command
-    set --function tpr_version 0.2
+    set --local options (fish_opt --short=h --long=help)
+    set --local options $options (fish_opt --short=v --long=version)
+    set --local options $options (fish_opt --short=C --long=directory --required-val)
 
-    set --function tpr_data_dir $XDG_DATA_HOME/tpr
-    set --function tpr_config_dir $XDG_CONFIG_HOME/tpr
+    argparse $options -- $argv
+    # echo $_flag_version
+    # echo $argv[1]
+
+    set --function tpr_version 0.3
+
+    # catch help and version flags
+    if set --query _flag_help
+        __tpr_help
+        return 0
+    end
+
+    if set --query _flag_version
+        echo "tpr, version $tpr_version"
+        return 0
+    end
+
+    # set main directory locations
+    if set --query XDG_DATA_HOME
+        set --function tpr_data_dir $XDG_DATA_HOME/tpr
+    else
+        set --function tpr_data_dir $HOME/.local/share/tpr
+    end
+
+    if set --query XDG_CONFIG_HOME
+        set --function tpr_config_dir $XDG_CONFIG_HOME/tpr
+    else
+        set --function tpr_config_dir $HOME/.config/tpr
+    end
+
+    if set --query _flag_directory
+        set --function tpr_working_dir $_flag_directory
+    else
+        set --function tpr_working_dir (pwd)
+    end
 
     mkdir --parents $tpr_data_dir
     mkdir --parents $tpr_config_dir
@@ -182,15 +218,11 @@ function tpr --description 'Initialize LaTeX project repositories' --argument co
     set --function tpr_template_dir $tpr_data_dir/templates
     set --function tpr_config_file $tpr_config_dir/config.toml
 
-    switch $command
-        case -v --version
-            echo "tpr, version $tpr_version"
+    if test (count $argv) -eq 0
+        __tpr_help; return 1
+    end
 
-
-        case '' -h --help
-            __tpr_help
-
-
+    switch "$argv[1]"
         case help
             __tpr_help $argv[2]
 
@@ -240,8 +272,8 @@ function tpr --description 'Initialize LaTeX project repositories' --argument co
 
 
         case init
-            if string length -q -- (ls -A)
-                __tpr_FAIL "Current directory is not empty"; return 1
+            if string length -q -- (ls -A $tpr_working_dir)
+                __tpr_FAIL "Working directory is not empty"; return 1
             end
 
             if not test (count $argv) -eq 2
@@ -255,22 +287,22 @@ function tpr --description 'Initialize LaTeX project repositories' --argument co
                 __tpr_FAIL "Invalid template '$TEMPLATE'"; return 1
             end
 
-            copier $tpr_template_dir/$TEMPLATE .
+            copier $tpr_template_dir/$TEMPLATE $tpr_working_dir
 
-            and git init
-            and git add -A
-            and git commit -m "Initialize new project repository."
+            and git -C $tpr_working_dir init
+            and git -C $tpr_working_dir add -A
+            and git -C $tpr_working_dir commit -m "Initialize new project repository."
 
             set --local commit_file $tpr_resource_dir/pre-commit
             if test -f "$commit_file"
-                cp $commit_file .git/hooks/pre-commit
+                cp $commit_file $tpr_working_dir/.git/hooks/pre-commit
             end
 
 
 
         case remote
             set --local REPONAME $argv[2]
-            if git config --get remote.origin.url
+            if git -C $tpr_working_dir config --get remote.origin.url
                 __tpr_FAIL "remote 'origin' already exists"; return 1
             end
 
@@ -280,10 +312,10 @@ function tpr --description 'Initialize LaTeX project repositories' --argument co
 
             set --function homepage (yq '.homepage' $tpr_config_file)
             if test -n "$homepage"
-                set --function homepage_cmd --homepage $homepage
+                set --function homepage_opt --homepage $homepage
             end
 
-            gh repo create $REPONAME --remote origin --source . --disable-issues --disable-wiki --private --push $homepage_cmd
+            gh repo create $REPONAME --remote origin --source $tpr_working_dir --disable-issues --disable-wiki --private --push $homepage_opt
 
 
         case list
@@ -293,7 +325,7 @@ function tpr --description 'Initialize LaTeX project repositories' --argument co
         case archive
             # check for all arguments and parse to variables
             if not test (count $argv) -gt 1
-                __tpr_FAIL "missing argument 'PDF'"; return 1
+                __tpr_FAIL "missing argument 'GZ'"; return 1
             end
 
             set --function GZ $argv[2]
@@ -301,12 +333,12 @@ function tpr --description 'Initialize LaTeX project repositories' --argument co
 
             if test -z "$COMMIT"
                 # if no commit is provided, populate $tarfile with current contents
-                if not git ls-files -z | xargs -0 tar -czf $GZ
+                if not git -C $tpr_working_dir ls-files -z | xargs -0 tar -czf $GZ -C $tpr_working_dir
                     return 1
                 end
             else
                 # otherwise, use `git archive` to dump to $tarfile
-                if not git archive --format=tar.gz $COMMIT --output $GZ
+                if not git -C $tpr_working_dir archive --format=tar.gz $COMMIT --output $GZ
                     return 1
                 end
             end
@@ -314,15 +346,15 @@ function tpr --description 'Initialize LaTeX project repositories' --argument co
 
         case validate
             # get and validate main.tex
-            set --local main_tex (__tpr_main_tex)
-            if not test -f "$main_tex"
+            set --local main_tex (__tpr_main_tex $tpr_working_dir)
+            if not test -f "$tpr_working_dir/$main_tex"
                 __tpr_FAIL "no tex file specified with .latexmain"; return 1
             end
 
             set --function COMMIT $argv[2]
 
             # make tempdir with latex contents
-            set --local temp_dir (__tpr_make_tempdir $COMMIT)
+            set --local temp_dir (__tpr_make_tempdir $tpr_working_dir $COMMIT)
             if not test -f "$temp_dir/$main_tex"
                 __tpr_FAIL "failed to generate archive"; return 1
             end
@@ -332,8 +364,8 @@ function tpr --description 'Initialize LaTeX project repositories' --argument co
 
         case compile
             # get and validate main.tex
-            set --local main_tex (__tpr_main_tex)
-            if not test -f "$main_tex"
+            set --local main_tex (__tpr_main_tex $tpr_working_dir)
+            if not test -f "$tpr_working_dir/$main_tex"
                 __tpr_FAIL "no tex file specified with .latexmain"; return 1
             end
 
@@ -346,7 +378,7 @@ function tpr --description 'Initialize LaTeX project repositories' --argument co
             set --function COMMIT $argv[3]
 
             # make tempdir with latex contents
-            set --local temp_dir (__tpr_make_tempdir $COMMIT)
+            set --local temp_dir (__tpr_make_tempdir $tpr_working_dir $COMMIT)
             if not test -f "$temp_dir/$main_tex"
                 __tpr_FAIL "failed to generate archive"; return 1
             end
@@ -356,10 +388,10 @@ function tpr --description 'Initialize LaTeX project repositories' --argument co
 
 
         case pull
-            copier update
+            copier update $tpr_working_dir
 
 
         case '*'
-            __tpr_FAIL "Unknown command: \"$command\""; return 1
+            __tpr_FAIL "Unknown command: \"$argv[1]\""; return 1
     end
 end
