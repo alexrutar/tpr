@@ -36,7 +36,8 @@ function __tpr_make_tempdir --description "archive the current directory to a te
 
     if not git -C $tpr_working_dir rev-parse --is-inside-work-tree 2> /dev/null >/dev/null
         # if not a git directory, just recursively list to generate tarfile
-        if not ls -Rt --ignore="*."{aux} $tpr_working_dir | xargs tar -rf $tarfile -C $tpr_working_dir
+        # TODO: use fd instead for better file listing
+        if not ls -t --ignore="*."{aux} $tpr_working_dir | xargs tar -rf $tarfile -C $tpr_working_dir
             return 1
         end
     else if test -z "$commit" >/dev/null
