@@ -11,6 +11,9 @@ complete --command tpr --exclusive --condition "not __fish_seen_subcommand_from 
 complete --command tpr --exclusive --condition "not __fish_seen_subcommand_from $tpr_subcommands" --arguments compile --description "Compile to PDF"
 complete --command tpr --exclusive --condition "not __fish_seen_subcommand_from $tpr_subcommands" --arguments list --description "List available templates"
 complete --command tpr --exclusive --condition "not __fish_seen_subcommand_from $tpr_subcommands" --arguments pull --description "Update local template"
+complete --command tpr --exclusive --condition "not __fish_seen_subcommand_from $tpr_subcommands" --arguments install --description "Install new template"
+complete --command tpr --exclusive --condition "not __fish_seen_subcommand_from $tpr_subcommands" --arguments uninstall --description "Uninstall existing template"
+complete --command tpr --exclusive --condition "not __fish_seen_subcommand_from $tpr_subcommands" --arguments update --description "Update installed templates"
 
 complete --command tpr --exclusive --condition "__fish_seen_subcommand_from init uninstall" --arguments "(tpr list)" 
 complete --command tpr --force-files --condition "__fish_seen_subcommand_from compile archive"
