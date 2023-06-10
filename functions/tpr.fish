@@ -178,9 +178,9 @@ function tpr --description 'Initialize LaTeX project repositories' --argument co
     set --local options $options (fish_opt --short=v --long=version)
     set --local options $options (fish_opt --short=C --long=directory --required-val)
 
+    # TODO: add include options for archive (to copy bbl, pdf, etc.)
+
     argparse $options -- $argv
-    # echo $_flag_version
-    # echo $argv[1]
 
     set --function tpr_version 0.3
 
@@ -300,7 +300,6 @@ function tpr --description 'Initialize LaTeX project repositories' --argument co
             if test -f "$commit_file"
                 cp $commit_file $tpr_working_dir/.git/hooks/pre-commit
             end
-
 
 
         case remote
