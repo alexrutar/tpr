@@ -33,7 +33,11 @@ function __tpr_make_tempdir --description "archive the current directory to a te
     set --local tarfile (mktemp)
     trap "rm -f $tarfile" INT TERM HUP EXIT
 
-    if test -z "$commit"
+    if not git rev-parse --is-inside-work-tree 2> /dev/null
+        if not ls -r | xargs tar -cf $tarfile
+            return 1
+        end
+    else if test -z "$commit"
         # if no commit is provided, populate $tarfile with current contents
         if not git ls-files -z | xargs -0 tar -cf $tarfile
             return 1
