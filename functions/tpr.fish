@@ -360,7 +360,6 @@ function tpr --description 'Initialize LaTeX project repositories' --argument co
 
 
         case '*'
-            echo "tpr: Unknown command: \"$command\"" >&2
-            return 1
+            __tpr_FAIL "Unknown command: \"$command\""; return 1
     end
 end
