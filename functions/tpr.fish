@@ -74,6 +74,8 @@ function __tpr_help --argument cmd
             echo '       tpr remote REPONAME       Create a remote repository'
             echo '       tpr pull                  Update existing project'
             echo '       tpr install NAME GIT      Install new template'
+            echo '       tpr uninstall NAME        Uninstall template'
+            echo '       tpr update                Update existing templates'
             echo
             echo 'Options:'
             echo '       -h/--help                 Print help and exit.'
