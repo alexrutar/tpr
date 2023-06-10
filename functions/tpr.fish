@@ -34,7 +34,8 @@ function __tpr_make_tempdir --description "archive the current directory to a te
     trap "rm -f $tarfile" INT TERM HUP EXIT
 
     if not git rev-parse --is-inside-work-tree 2> /dev/null
-        if not ls -r | xargs tar -cf $tarfile
+        # if not a git directory, just recursively list to generate tarfile
+        if not ls -t --ignore="*."{pdf, aux} | xargs tar -rf $tarfile
             return 1
         end
     else if test -z "$commit"
