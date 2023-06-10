@@ -34,20 +34,14 @@ function __tpr_make_tempdir --description "archive the current directory to a te
     set --local tarfile (mktemp)
     trap "rm -f $tarfile" INT TERM HUP EXIT
 
-    if not git -C $tpr_working_dir rev-parse --is-inside-work-tree 2> /dev/null >/dev/null
-        # if not a git directory, just recursively list to generate tarfile
-        # TODO: use fd instead for better file listing
-        if not ls -t --ignore="*."{aux} $tpr_working_dir | xargs tar -rf $tarfile -C $tpr_working_dir
-            return 1
-        end
-    else if test -z "$commit" >/dev/null
-        # if no commit is provided, populate $tarfile with current contents
-        if not git -C $tpr_working_dir ls-files -z | xargs -0 tar -cf $tarfile -C $tpr_working_dir
+    if test -n "$commit" >/dev/null
+        # use `git archive` to dump to $tarfile if commit specified
+        if not git -C $tpr_working_dir archive --format=tar $commit --output $tarfile
             return 1
         end
     else
-        # otherwise, use `git archive` to dump to $tarfile
-        if not git -C $tpr_working_dir archive --format=tar $commit --output $tarfile
+        # otherwise, populate $tarfile with current contents
+        if not fd -H --exclude '.git' --base-directory $tpr_working_dir --print0 | xargs -0 tar -rf $tarfile -C $tpr_working_dir
             return 1
         end
     end
@@ -80,6 +74,12 @@ function __tpr_help --argument cmd
             echo '       tpr remote REPONAME       Create a remote repository'
             echo '       tpr pull                  Update existing project'
             echo '       tpr install NAME GIT      Install new template'
+            echo
+            echo 'Options:'
+            echo '       -h/--help                 Print help and exit.'
+            echo '       --v/-version              Print version and exit.'
+            echo '       -C/--directory            Specify working directory (default: .)'
+            echo
             echo
             echo 'Run `tpr help [subcommand]` for more information on each'
             echo 'subcommand, or visit https://github.com/alexrutar/tpr for more'
@@ -319,11 +319,11 @@ function tpr --description 'Initialize LaTeX project repositories' --argument co
             gh repo create $REPONAME --remote origin --source $tpr_working_dir --disable-issues --disable-wiki --private --push $homepage_opt
 
 
-        case list
+        case list ls
             __tpr_list_templates $tpr_template_dir
 
 
-        case archive
+        case archive export
             # check for all arguments and parse to variables
             if not test (count $argv) -gt 1
                 __tpr_FAIL "missing argument 'GZ'"; return 1

@@ -1,5 +1,5 @@
 function _tpr_install --on-event tpr_install
-    for cmd in copier git latexmk gh yq
+    for cmd in copier git latexmk gh yq fd
         if not which $cmd &> /dev/null
             set_color yellow; echo "Warning: cannot find command '$cmd'. See https://github.com/alexrutar/tpr#dependencies for more details."; set_color normal
         end
