@@ -28,7 +28,7 @@ end
 
 
 function __tpr_make_tempdir --description "archive the current directory to a temporary tarfile" --argument tpr_working_dir commit
-    set --function temp_dir (mktemp --directory)
+    set --local temp_dir (mktemp --directory)
     trap "rm -rf $temp_dir" INT TERM HUP EXIT
 
     set --local tarfile (mktemp)
@@ -351,7 +351,7 @@ function tpr --description 'Initialize LaTeX project repositories' --argument co
                 __tpr_FAIL "no tex file specified with .latexmain"; return 1
             end
 
-            set --function COMMIT $argv[2]
+            set --local COMMIT $argv[2]
 
             # make tempdir with latex contents
             set --local temp_dir (__tpr_make_tempdir $tpr_working_dir $COMMIT)
@@ -375,7 +375,7 @@ function tpr --description 'Initialize LaTeX project repositories' --argument co
             end
 
             set --local PDF $argv[2]
-            set --function COMMIT $argv[3]
+            set --local COMMIT $argv[3]
 
             # make tempdir with latex contents
             set --local temp_dir (__tpr_make_tempdir $tpr_working_dir $COMMIT)
