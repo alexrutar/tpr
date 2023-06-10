@@ -1,4 +1,4 @@
-set -l tpr_subcommands init remote archive validate compile list pull
+set -l tpr_subcommands init remote archive validate compile list pull install uninstall update
 complete --command tpr --exclusive
 complete --command tpr --exclusive --short-option h --long-option help --description "Print help"
 complete --command tpr --exclusive --short-option v --long-option version --description "Print version"
