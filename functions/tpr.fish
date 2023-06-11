@@ -180,7 +180,9 @@ function tpr --description 'Initialize LaTeX project repositories' --argument co
 
     # TODO: add include options for archive (to copy bbl, pdf, etc.)
 
-    argparse $options -- $argv
+    if not argparse $options -- $argv
+        return 1
+    end
 
     set --function tpr_version 0.3
 
