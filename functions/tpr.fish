@@ -150,7 +150,7 @@ function __tpr_help --argument cmd
             echo '  > tpr remote alexrutar/test-repo'
 
         case install
-            echo 'Usage: tpr install [NAME] [GIT]'
+            echo 'Usage: tpr install NAME GIT'
             echo
             echo '  Install new templates with name NAME from the git repository GIT.'
             echo '  This is an error if the template already exists: to update, run'
@@ -162,13 +162,18 @@ function __tpr_help --argument cmd
             echo
             echo '  for more details about template creation.'
 
+        case uninstall
+            echo 'Usage: tpr uninstall NAME'
+            echo
+            echo '  Uninstall the templates with name NAME.'
+
         case pull
             echo 'Usage: tpr pull'
             echo
             echo '  Apply upstream template changes to the current project.'
 
         case '*'
-            __tpr_FAIL "Invalid subcommand '$argv[2]'"; return 1
+            __tpr_FAIL "Invalid subcommand '$cmd'"; return 1
     end
 end
 
