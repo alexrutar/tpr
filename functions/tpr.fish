@@ -297,7 +297,7 @@ function tpr --description 'Initialize LaTeX project repositories' --argument co
                 __tpr_FAIL "Invalid template '$TEMPLATE'"; return 1
             end
 
-            copier $tpr_template_dir/$TEMPLATE $tpr_working_dir
+            copier copy $tpr_template_dir/$TEMPLATE $tpr_working_dir
 
             and git -C $tpr_working_dir init
             and git -C $tpr_working_dir add -A
