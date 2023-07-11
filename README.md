@@ -22,6 +22,7 @@ In order to use `tpr`, you need a few dependencies.
 4. You need [copier](https://copier.readthedocs.io/en/stable/).
 
 If you want to use the `tpr remote` command, you need the following additional dependencies.
+
 5. You need the [yq](https://github.com/mikefarah/yq) command.
 6. You need the [github cli](https://cli.github.com/)
 
