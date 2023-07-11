@@ -64,10 +64,10 @@ to create an archive file `out.tar.gz`.
 You can apply commands to an arbitrary directory using the `-C/--directory` option.
 Run
 ```fish
-tpr --help
+tpr help
 ```
 or
-```
+```fish
 tpr help <subcommand>
 ```
 for more information.
