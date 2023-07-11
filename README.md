@@ -27,6 +27,7 @@ If you want to use the `tpr remote` command, you need the following additional d
 6. You need the [github cli](https://cli.github.com/)
 
 ## Basic usage
+### Initialization
 In order to use templates, we first need to install some templates.
 We can use this [preprint template](https://github.com/rutar-academic/template-preprint).
 Simply run
@@ -35,6 +36,7 @@ tpr install preprint https://github.com/rutar-academic/template-preprint
 ```
 This installs the template located at the URL `https://github.com/rutar-academic/template-preprint` under the name `preprint`.
 You can check that the template is installed with `tpr list`.
+Templates are installed in the directory `$XDG_DATA_HOME/tpr/templates`.
 
 Now, create a new directory, change to it, and initialize
 ```fish
@@ -44,6 +46,7 @@ tpr init preprint
 ```
 This will copy a number of files to the current directory and initialize a git repository.
 
+### Compilation and exports
 To build a PDF file from the project, run
 ```fish
 tpr compile out.pdf
@@ -57,6 +60,7 @@ tpr archive out.tar.gz
 ```
 to create an archive file `out.tar.gz`.
 
+### More help
 You can apply commands to an arbitrary directory using the `-C/--directory` option.
 Run
 ```fish
@@ -68,6 +72,7 @@ tpr help <subcommand>
 ```
 for more information.
 
+## Advanced features
 ### Remote repository management
 You can create remote repositories on GitHub using the `tpr remote` subcommand.
 Simply run with
