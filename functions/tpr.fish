@@ -59,11 +59,39 @@ function __tpr_list_templates --argument template_directory
 end
 
 
+function __tpr_echo_code
+    echo -n '`'
+    set_color brgreen
+    echo -n "$argv"
+    set_color normal
+    echo -n '`'
+end
+
+
+function __tpr_echo_url
+    set_color blue
+    echo -n 'https://'
+    echo -n "$argv"
+    set_color normal
+end
+
+
+function __tpr_echo_usage
+    set_color cyan --bold
+    echo -n 'Usage: '
+    set_color normal
+    echo "$argv"
+    echo
+end
+
+
 # also add files with tpr archive GZ --pdf --bbl ...?
 function __tpr_help --argument cmd
     switch $cmd
         case ''
+            set_color cyan --bold
             echo 'Usage:'
+            set_color normal
             echo '  tpr init TEMPLATE         Create new project from TEMPLATE'
             echo '  tpr list                  List available templates'
             echo '  tpr compile PDF [COMMIT]  Compile and output to PDF'
@@ -78,33 +106,34 @@ function __tpr_help --argument cmd
             echo '  tpr uninstall NAME        Uninstall template'
             echo '  tpr update                Update existing templates'
             echo
+            set_color cyan --bold
             echo 'Options:'
+            set_color normal
             echo '  -h/--help                 Print help and exit.'
             echo '  --v/-version              Print version and exit.'
             echo '  -C/--directory            Specify working directory (default: .)'
             echo
+            echo -n 'Run '; __tpr_echo_code 'tpr help [subcommand]'; echo ' for more information, or visit'
+            echo -n '  '
+            __tpr_echo_url 'github.com/alexrutar/tpr'
             echo
-            echo 'Run `tpr help [subcommand]` for more information on each'
-            echo 'subcommand, or visit https://github.com/alexrutar/tpr.'
 
         case init
-            echo 'Usage: tpr init TEMPLATE'
-            echo
+            __tpr_echo_usage 'tpr init TEMPLATE'
             echo '  Create a new project in the current directory from TEMPLATE.'
             echo '  For information about template specification and installation,'
             echo '  run `tpr help install`.'
             echo
 
         case list
-            echo 'Usage: tpr list'
-            echo
-            echo '  List all available templates. Note that this only lists'
-            echo '  templates that been installed. Install or update templates'
-            echo '  with `tpr install`.'
+            __tpr_echo_usage 'tpr list'
+            echo '  List all available templates. Install or update templates'
+            echo -n '  with '
+            __tpr_echo_code 'tpr install'
+            echo '.'
 
         case compile
-            echo 'Usage: tpr compile PDF'
-            echo
+            __tpr_echo_usage 'tpr compile PDF'
             echo '  Compile tex file specified with .latexmain in the current directory'
             echo '  and check for errors. Output the compiled file to PDF.'
             echo
@@ -115,8 +144,7 @@ function __tpr_help --argument cmd
             echo '  `git archive`'
 
         case validate
-            echo 'Usage: tpr validate'
-            echo
+            __tpr_echo_usage 'tpr validate'
             echo '  Compile tex file specified with .latexmain in the current'
             echo '  directory and check for errors. The command used is'
             echo
@@ -127,9 +155,7 @@ function __tpr_help --argument cmd
             echo '  `git archive`'
 
         case archive
-            echo '       tpr archive GZ [COMMIT]  Export files to GZ'
-            echo '                                  COMMIT: use commit'
-            echo
+            __tpr_echo_usage 'tpr archive GZ [COMMIT]'
             echo '  Export files in the current repository as a g-zipped archive'
             echo '  to the file specified with GZ. The export respects'
             echo '  your .gitignore.'
@@ -139,8 +165,7 @@ function __tpr_help --argument cmd
             echo '  `git archive`'
 
         case remote
-            echo 'Usage: tpr remote REPONAME'
-            echo
+            __tpr_echo_usage 'tpr remote REPONAME'
             echo '  Create a new private remote GitHub repository with name'
             echo '  REPONAME. REPONAME is an identifier of the form username/repo.'
             echo
@@ -158,8 +183,7 @@ function __tpr_help --argument cmd
 
 
         case install
-            echo 'Usage: tpr install NAME GIT'
-            echo
+            __tpr_echo_usage 'tpr install NAME GIT'
             echo '  Install new templates with name NAME from the git repository GIT.'
             echo '  This is an error if the template already exists: to update, run'
             echo '  `tpr update`, and to remote a template, run `tpr remove-template`.'
@@ -171,13 +195,11 @@ function __tpr_help --argument cmd
             echo '  for more details about template creation.'
 
         case uninstall
-            echo 'Usage: tpr uninstall NAME'
-            echo
+            __tpr_echo_usage 'tpr uninstall NAME'
             echo '  Uninstall the templates with name NAME.'
 
         case pull
-            echo 'Usage: tpr pull'
-            echo
+            __tpr_echo_usage 'tpr pull'
             echo '  Apply upstream template changes to the current project.'
 
         case '*'
