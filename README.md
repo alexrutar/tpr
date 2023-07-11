@@ -35,7 +35,9 @@ Simply run
 tpr install preprint https://github.com/rutar-academic/template-preprint
 ```
 This installs the template located at the URL `https://github.com/rutar-academic/template-preprint` under the name `preprint`.
-You can check that the template is installed with `tpr list`.
+You can install templates from any valid git URL or a local git repository.
+
+List available templates with `tpr list`
 Templates are installed in the directory `$XDG_DATA_HOME/tpr/templates`.
 
 Now, create a new directory, change to it, and initialize
@@ -73,6 +75,15 @@ tpr help <subcommand>
 for more information.
 
 ## Advanced features
+### Compiling and exporting specific commits
+Some commands, such as `tpr compile` or `tpr archive`, take an optional `COMMIT` argument.
+This can be any git tree-ish reference, as accepted by `git archive`.
+For instance, if you have a tag `v0.1`, you can run
+```
+tpr archive v0.1
+```
+to create an export using the `v0.1` tag.
+
 ### Remote repository management
 You can create remote repositories on GitHub using the `tpr remote` subcommand.
 Simply run with
