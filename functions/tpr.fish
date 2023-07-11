@@ -84,8 +84,7 @@ function __tpr_help --argument cmd
             echo
             echo
             echo 'Run `tpr help [subcommand]` for more information on each'
-            echo 'subcommand, or visit https://github.com/alexrutar/tpr for more'
-            echo 'detailed information.'
+            echo 'subcommand, or visit https://github.com/alexrutar/tpr.'
 
         case init
             echo 'Usage: tpr init TEMPLATE'
