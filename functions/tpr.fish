@@ -110,7 +110,7 @@ function __tpr_help --argument cmd
             echo 'Options:'
             set_color normal
             echo '  -h/--help                 Print help and exit.'
-            echo '  --v/-version              Print version and exit.'
+            echo '  -v/-version              Print version and exit.'
             echo '  -C/--directory            Specify working directory (default: .)'
             echo
             echo -n 'Run '; __tpr_echo_code 'tpr help [subcommand]'; echo ' for more information, or visit'
@@ -122,8 +122,9 @@ function __tpr_help --argument cmd
             __tpr_echo_usage 'tpr init TEMPLATE'
             echo '  Create a new project in the current directory from TEMPLATE.'
             echo '  For information about template specification and installation,'
-            echo '  run `tpr help install`.'
-            echo
+            echo -n '  run '
+            __tpr_echo_code 'tpr help install'
+            echo '.'
 
         case list
             __tpr_echo_usage 'tpr list'
@@ -137,11 +138,10 @@ function __tpr_help --argument cmd
             echo '  Compile tex file specified with .latexmain in the current directory'
             echo '  and check for errors. Output the compiled file to PDF.'
             echo
-            echo '  > latexmk -pdf -interaction=nonstopmode -silent -Werror'
+            echo -n '  > '; set_color brgreen; echo -n 'latexmk -pdf -interaction=nonstopmode -silent -Werror'; set_color normal; echo
             echo
             echo '  If COMMIT is given, use the commit specified by COMMIT.'
-            echo '  The COMMIT argument is used as the argument to'
-            echo '  `git archive`'
+            echo -n '  The COMMIT argument is used as the argument to '; __tpr_echo_code 'git archive'; echo '.'
 
         case validate
             __tpr_echo_usage 'tpr validate'
@@ -151,8 +151,7 @@ function __tpr_help --argument cmd
             echo '  > latexmk -pdf -interaction=nonstopmode -silent -Werror'
             echo
             echo '  If COMMIT is given, use the commit specified by COMMIT.'
-            echo '  The COMMIT argument is used as the argument to'
-            echo '  `git archive`'
+            echo -n '  The COMMIT argument is used as the argument to '; __tpr_echo_code 'git archive'; echo '.'
 
         case archive
             __tpr_echo_usage 'tpr archive GZ [COMMIT]'
@@ -161,8 +160,7 @@ function __tpr_help --argument cmd
             echo '  your .gitignore.'
             echo
             echo '  If COMMIT is given, use the commit specified by COMMIT.'
-            echo '  The COMMIT argument is used as the argument to'
-            echo '  `git archive`'
+            echo -n '  The COMMIT argument is used as the argument to '; __tpr_echo_code 'git archive'; echo '.'
 
         case remote
             __tpr_echo_usage 'tpr remote REPONAME'
@@ -190,7 +188,7 @@ function __tpr_help --argument cmd
             echo
             echo '  Templates for the project are rendered using copier. See'
             echo
-            echo '    https://copier.readthedocs.io/en/stable/.'
+            echo -n '    '; __tpr_echo_url 'copier.readthedocs.io/en/stable/'; echo
             echo
             echo '  for more details about template creation.'
 
