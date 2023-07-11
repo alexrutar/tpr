@@ -32,6 +32,7 @@ end
 
 __tpr_test help
 __tpr_test help list
+__tpr_test help install
 
 # CLEANUP
 # -------
