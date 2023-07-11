@@ -148,6 +148,14 @@ function __tpr_help --argument cmd
             echo
             echo '  Create a new private repository at alexrutar/test-repo.'
             echo '  > tpr remote alexrutar/test-repo'
+            echo
+            echo 'Configuration:'
+            echo '  tpr reads configuration from `$XDG_CONFIG_HOME/tpr/config.toml`,'
+            echo '  which is often `~/.config/tpr/config.toml`. The following keys'
+            echo '  are supported:'
+            echo
+            echo '`homepage`: default homepage for your reporitory'
+
 
         case install
             echo 'Usage: tpr install NAME GIT'
