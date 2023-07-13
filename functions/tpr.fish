@@ -302,7 +302,7 @@ function tpr --description 'Initialize LaTeX project repositories' --argument co
 
         case update
             for file in $tpr_template_dir/*
-                fish --command "git -C $file pull" &
+                fish --command "git -C $file pull --force" &
                 set --append pid_list (jobs --last --pid)
             end
 
