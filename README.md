@@ -63,7 +63,6 @@ tpr archive out.tar.gz
 to create an archive file `out.tar.gz`.
 
 ### More help
-You can apply commands to an arbitrary directory using the `-C/--directory` option.
 Run
 ```fish
 tpr help
@@ -80,7 +79,7 @@ Some commands, such as `tpr compile` or `tpr archive`, take an optional `COMMIT`
 This can be any git tree-ish reference, as accepted by `git archive`.
 For instance, if you have a tag `v0.1`, you can run
 ```
-tpr archive v0.1
+tpr archive out.tar.gz v0.1
 ```
 to create an export using the `v0.1` tag.
 
@@ -95,8 +94,14 @@ to create a private GitHub repository at `https://github.com/username/repo`.
 Note that `tpr remote` reads some default settings from `$XDG_CONFIG_HOME/tpr/config.toml`.
 
 ### Managing templates
-1. Update all existing templates with `tpr update`.
-2. Uninstall template `<name>` with `tpr uninstall <name>`.
+You can update all existing templates with
+```
+tpr update
+```
+Uninstall template `<name>` with
+```
+tpr uninstall <name>
+```
 
 
 ### Writing your own templates
