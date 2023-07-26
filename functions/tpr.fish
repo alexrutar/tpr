@@ -85,7 +85,7 @@ function __tpr_echo_usage
 end
 
 
-# also add files with tpr archive GZ --pdf --bbl ...?
+# add --include / -I option to tpr archive with a regex
 function __tpr_help --argument cmd
     switch $cmd
         case ''
