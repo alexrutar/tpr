@@ -5,6 +5,7 @@ Jump to:
 - [Installation](#installation)
 - [Dependencies](#dependencies)
 - [Basic usage](#basic-usage)
+- [Advanced features](#advanced-features)
 
 ## Installation
 If you have something like [fisher](https://github.com/jorgebucaran/fisher), you can
@@ -34,16 +35,16 @@ Visit the linked pages for precise installation instructions.
 
 ## Basic usage
 ### Initialization
-In order to use templates, we first need to install some templates.
+In order to use `tpr`, we first need to install some templates.
 We can use this [preprint template](https://github.com/rutar-academic/template-preprint).
 Simply run
 ```fish
-tpr install preprint https://github.com/rutar-academic/template-preprint
+tpr template install preprint https://github.com/rutar-academic/template-preprint
 ```
 This installs the template located at the URL `https://github.com/rutar-academic/template-preprint` under the name `preprint`.
 You can install templates from any valid git URL or a local git repository.
 
-List available templates with `tpr list`
+List available templates with `tpr template list`
 Templates are installed in the directory `$XDG_DATA_HOME/tpr/templates`.
 
 Now, create a new directory, change to it, and initialize
@@ -76,11 +77,11 @@ tpr archive --bare -I bbl arxiv.tar.gz
 ### More help
 Run
 ```fish
-tpr help
+tpr --help
 ```
 or
 ```fish
-tpr help $subcommand
+tpr $subcommand --help
 ```
 for more information.
 
@@ -97,14 +98,14 @@ to create an export using the `v0.1` tag.
 ### Creating diff files
 It is often useful to visualize changes between two versions of a `.tex` file.
 A convenient tool for doing this is the [`latexdiff` script](https://ctan.org/pkg/latexdiff?lang=en).
-The `tpr diff` tool provides a wrapper around `latexfiff` to automatically generate the diff file and compile it.
+The `tpr diff` tool provides a wrapper around `latexdiff` to automatically generate the diff file and compile it.
 For example
 ```fish
 tpr diff diff.pdf HEAD~3
 ```
 creates a file `diff.pdf` showing the changes made between `HEAD~3` and `HEAD`.
 Note that the file `diff.pdf` is compiled against the project files in `HEAD`.
-This may cause compilation errors if there are substantial changes in other project files.
+This may cause compilation issues if there are substantial changes in other project files.
 
 ### Remote repository management
 You can create remote repositories on GitHub using the `tpr remote` subcommand.
@@ -119,13 +120,12 @@ Note that `tpr remote` reads some default settings from `$XDG_CONFIG_HOME/tpr/co
 ### Managing templates
 You can update all existing templates with
 ```fish
-tpr update
+tpr template update
 ```
 Uninstall template `$name` with
 ```fish
-tpr uninstall $name
+tpr template uninstall $name
 ```
-
 
 ### Writing your own templates
 Templates for `tpr` are managed using [copier](https://copier.readthedocs.io/en/stable/).
