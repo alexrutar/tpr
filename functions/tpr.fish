@@ -284,6 +284,10 @@ function tpr --description 'Initialize LaTeX project repositories' --argument co
 
 
         case template
+            if test (count $argv[2..]) -eq 0
+                __tpr_help template; return 1
+            end
+
             switch $argv[2]
                 case install
                     if not argparse -- $argv[3..]
