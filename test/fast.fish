@@ -4,9 +4,8 @@
 # set initial variables
 set --local tpr_dir /Users/alexrutar/Documents/20_29-Programming/20-Development/22.14-tpr
 set --local test_dir $tpr_dir/test
-set --local test_tempdir $test_dir/temp
+set --local test_tempdir (mktemp --directory)
 
-mkdir $test_tempdir
 cd $test_tempdir
 
 # install correct vs version from directory
@@ -30,9 +29,15 @@ end
 # TESTING
 # -------
 
-__tpr_test help
-__tpr_test help list
-__tpr_test help install
+# __tpr_test init preprint
+# __tpr_test init plain
+# __tpr_test template install "test-preprint" https://github.com/rutar-academic/template-preprint
+# __tpr_test template uninstall "test-preprint"
+__tpr_test help template
+__tpr_test help template update
+# __tpr_test init preprint
+# __tpr_test archive out.tar.gz
+# ls
 
 # CLEANUP
 # -------

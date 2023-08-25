@@ -16,15 +16,21 @@ Otherwise, the function is in [functions/tpr.fish](functions/tpr.fish) and the c
 ### Dependencies
 In order to use `tpr`, you need a few dependencies.
 
-1. You need a somewhat recent [git](https://git-scm.com/) installation.
-2. You need a somewhat recent [fd](https://github.com/sharkdp/fd) installation.
-3. You need a working LaTeX distribution which supports `latexmk`.
-4. You need [copier](https://copier.readthedocs.io/en/stable/).
+1. A working LaTeX distribution which supports `latexmk` (such as [TeX Live](https://tug.org/texlive/)).
+2. [copier](https://copier.readthedocs.io/en/stable/), for template management.
+3. [git](https://git-scm.com/), for managing version control.
+4. [fd](https://github.com/sharkdp/fd), for basic file system management.
 
 If you want to use the `tpr remote` command, you need the following additional dependencies.
 
-5. You need the [yq](https://github.com/mikefarah/yq) command.
-6. You need the [github cli](https://cli.github.com/)
+5. [yq](https://github.com/mikefarah/yq), for reading configuration files.
+6. The [github cli](https://cli.github.com/), for managing remote repositories.
+
+If you want to use the `tpr archive --bare` command, you need the following additional dependency.
+
+7. [arxiv_latex_cleaner](https://github.com/google-research/arxiv-latex-cleaner), for cleaning the export folder.
+
+Visit the linked pages for precise installation instructions.
 
 ## Basic usage
 ### Initialization
@@ -69,7 +75,7 @@ tpr help
 ```
 or
 ```fish
-tpr help <subcommand>
+tpr help $subcommand
 ```
 for more information.
 
@@ -78,7 +84,7 @@ for more information.
 Some commands, such as `tpr compile` or `tpr archive`, take an optional `COMMIT` argument.
 This can be any git tree-ish reference, as accepted by `git archive`.
 For instance, if you have a tag `v0.1`, you can run
-```
+```fish
 tpr archive out.tar.gz v0.1
 ```
 to create an export using the `v0.1` tag.
@@ -95,12 +101,12 @@ Note that `tpr remote` reads some default settings from `$XDG_CONFIG_HOME/tpr/co
 
 ### Managing templates
 You can update all existing templates with
-```
+```fish
 tpr update
 ```
-Uninstall template `<name>` with
-```
-tpr uninstall <name>
+Uninstall template `$name` with
+```fish
+tpr uninstall $name
 ```
 
 
