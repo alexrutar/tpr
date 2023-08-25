@@ -59,171 +59,7 @@ function __tpr_list_templates --argument template_directory
 end
 
 
-function __tpr_echo_code
-    echo -n '`'
-    set_color brgreen
-    echo -n "$argv"
-    set_color normal
-    echo -n '`'
-end
-
-
-function __tpr_echo_url
-    set_color blue
-    echo -n 'https://'
-    echo -n "$argv"
-    set_color normal
-end
-
-
-function __tpr_echo_usage
-    set_color cyan --bold
-    echo -n 'Usage: '
-    set_color normal
-    echo "$argv"
-    echo
-end
-
-
 # add tpr diff command OLD [NEW] to automatically generate a diff PDF.
-function __tpr_help --argument cmd
-    switch $cmd
-        case ''
-            set_color cyan --bold
-            echo 'Usage:'
-            set_color normal
-            echo '  tpr init TEMPLATE         Create new project from TEMPLATE'
-            echo '  tpr template ...          Various subcommands for managing templates'
-            echo '  tpr compile PDF [COMMIT]  Compile and output to PDF'
-            echo '                              COMMIT: use commit'
-            echo '  tpr validate [COMMIT]     Verify compilation'
-            echo '                              COMMIT: use commit'
-            echo '  tpr archive GZ [COMMIT]   Export files to GZ'
-            echo '                              COMMIT: use commit'
-            echo '  tpr remote REPONAME       Create a remote repository'
-            echo '  tpr update                Update existing project'
-            echo '  tpr install NAME GIT      Install new template'
-            echo '  tpr uninstall NAME        Uninstall template'
-            echo '  tpr upgrade-templates     Update existing templates'
-            echo
-            set_color cyan --bold
-            echo 'Options:'
-            set_color normal
-            echo '  -h/--help                 Print help and exit.'
-            echo '  -v/-version              Print version and exit.'
-            echo '  -C/--directory            Specify working directory (default: .)'
-            echo
-            echo -n 'Run '; __tpr_echo_code 'tpr [subcommand] --help'; echo ' for more information, or visit'
-            echo -n '  '
-            __tpr_echo_url 'github.com/alexrutar/tpr'
-            echo
-
-        case init
-            __tpr_echo_usage 'tpr init TEMPLATE'
-            echo '  Create a new project in the current directory from TEMPLATE.'
-            echo '  For information about template specification and installation,'
-            echo -n '  run '
-            __tpr_echo_code 'tpr install --help'
-            echo '.'
-
-        case compile
-            __tpr_echo_usage 'tpr compile PDF'
-            echo '  Compile tex file specified with .latexmain in the current directory'
-            echo '  and check for errors. Output the compiled file to PDF.'
-            echo
-            echo -n '  > '; set_color brgreen; echo -n 'latexmk -pdf -interaction=nonstopmode -silent -Werror'; set_color normal; echo
-            echo
-            echo '  If COMMIT is given, use the commit specified by COMMIT.'
-            echo -n '  The COMMIT argument is used as the argument to '; __tpr_echo_code 'git archive'; echo '.'
-
-        case validate
-            __tpr_echo_usage 'tpr validate'
-            echo '  Compile tex file specified with .latexmain in the current'
-            echo '  directory and check for errors. The command used is'
-            echo
-            echo '  > latexmk -pdf -interaction=nonstopmode -silent -Werror'
-            echo
-            echo '  If COMMIT is given, use the commit specified by COMMIT.'
-            echo -n '  The COMMIT argument is used as the argument to '; __tpr_echo_code 'git archive'; echo '.'
-
-        case archive
-            __tpr_echo_usage 'tpr archive GZ [COMMIT]'
-            echo '  Export files in the current repository as a g-zipped archive'
-            echo '  to the file specified with GZ. The export respects'
-            echo '  your .gitignore.'
-            echo
-            echo '  If COMMIT is given, use the commit specified by COMMIT.'
-            echo -n '  The COMMIT argument is used as the argument to '; __tpr_echo_code 'git archive'; echo '.'
-
-        case remote
-            __tpr_echo_usage 'tpr remote REPONAME'
-            echo '  Create a new private remote GitHub repository with name'
-            echo '  REPONAME. REPONAME is an identifier of the form username/repo.'
-            echo
-            echo 'Example usage:'
-            echo
-            echo '  Create a new private repository at alexrutar/test-repo.'
-            echo '  > tpr remote alexrutar/test-repo'
-            echo
-            echo 'Configuration:'
-            echo '  tpr reads configuration from `$XDG_CONFIG_HOME/tpr/config.toml`,'
-            echo '  which is often `~/.config/tpr/config.toml`. The following keys'
-            echo '  are supported:'
-            echo
-            echo '`homepage`: default homepage for your reporitory'
-
-
-        case template
-            set_color cyan --bold
-            echo 'Subcommands:'
-            set_color normal
-            echo '  install NAME GIT    Install new template'
-            echo '  uninstall NAME      Uninstall template'
-            echo '  update              Update existing templates'
-            echo
-            echo -n 'Run '; __tpr_echo_code 'tpr template [subcommand] --help'; echo ' for more information, or visit'
-            echo -n '  '
-            __tpr_echo_url 'github.com/alexrutar/tpr'
-            echo
-
-
-        case template-install
-            __tpr_echo_usage 'tpr template install NAME GIT'
-            echo '  Install new templates with name NAME from the git repository GIT.'
-            echo '  This is an error if the template already exists: to update, run'
-            echo '  `tpr update`, and to remote a template, run `tpr remove-template`.'
-            echo
-            echo '  Templates for the project are rendered using copier. See'
-            echo
-            echo -n '    '; __tpr_echo_url 'copier.readthedocs.io/en/stable/'; echo
-            echo
-            echo '  for more details about template creation.'
-
-
-        case template-uninstall
-            __tpr_echo_usage 'tpr uninstall NAME'
-            echo '  Uninstall the templates with name NAME.'
-
-
-        case template-update
-            __tpr_echo_usage 'tpr template update'
-            echo '  Apply upstream template changes to the current project.'
-
-
-        case template-list
-            __tpr_echo_usage 'tpr template list'
-            echo '  List all available templates. Install or update templates'
-            echo -n '  with '
-            __tpr_echo_code 'tpr install'
-            echo '.'
-
-
-        case '*'
-            __tpr_FAIL "Invalid subcommand '$cmd'"; return 1
-    end
-end
-
-
 function tpr --description 'Initialize LaTeX project repositories' --argument command
     set --local options (fish_opt --short=h --long=help)
     set --local options $options (fish_opt --short=v --long=version)
@@ -237,8 +73,7 @@ function tpr --description 'Initialize LaTeX project repositories' --argument co
 
     # catch help and version flags
     if set --query _flag_help
-        __tpr_help
-        return 0
+        tpr_help; return 0
     end
 
     if set --query _flag_version
@@ -273,7 +108,7 @@ function tpr --description 'Initialize LaTeX project repositories' --argument co
     set --function tpr_config_file $tpr_config_dir/config.toml
 
     if test (count $argv) -eq 0
-        __tpr_help; return 1
+        tpr_help; return 1
     end
 
     set --local options (fish_opt --short=h --long=help)
@@ -286,11 +121,11 @@ function tpr --description 'Initialize LaTeX project repositories' --argument co
             end
 
             if set --query _flag_help
-                __tpr_help template; return 0
+                tpr_help template; return 0
             end
 
             if test (count $argv) -eq 0
-                __tpr_help template; return 1
+                tpr_help template; return 1
             end
 
 
@@ -302,7 +137,7 @@ function tpr --description 'Initialize LaTeX project repositories' --argument co
                     end
 
                     if set --query _flag_help
-                        __tpr_help template-install; return 0
+                        tpr_help template-install; return 0
                     end
 
                     # first positional
@@ -339,7 +174,7 @@ function tpr --description 'Initialize LaTeX project repositories' --argument co
                     end
 
                     if set --query _flag_help
-                        __tpr_help template-uninstall; return 0
+                        tpr_help template-uninstall; return 0
                     end
 
                     # first positional
@@ -367,7 +202,7 @@ function tpr --description 'Initialize LaTeX project repositories' --argument co
                     end
 
                     if set --query _flag_help
-                        __tpr_help template-update; return 0
+                        tpr_help template-update; return 0
                     end
 
                     for file in $tpr_template_dir/*
@@ -385,7 +220,7 @@ function tpr --description 'Initialize LaTeX project repositories' --argument co
                     end
 
                     if set --query _flag_help
-                        __tpr_help template-list; return 0
+                        tpr_help template-list; return 0
                     end
 
                     __tpr_list_templates $tpr_template_dir
@@ -403,7 +238,7 @@ function tpr --description 'Initialize LaTeX project repositories' --argument co
             end
 
             if set --query _flag_help
-                __tpr_help init; return 0
+                tpr_help init; return 0
             end
 
             if string length -q -- (ls -A $tpr_working_dir)
@@ -442,7 +277,7 @@ function tpr --description 'Initialize LaTeX project repositories' --argument co
             end
 
             if set --query _flag_help
-                __tpr_help remote; return 0
+                tpr_help remote; return 0
             end
 
             set --local REPONAME $argv[1]
@@ -473,7 +308,7 @@ function tpr --description 'Initialize LaTeX project repositories' --argument co
             end
 
             if set --query _flag_help
-                __tpr_help archive; return 0
+                tpr_help archive; return 0
             end
 
             if set --query _flag_include
@@ -486,6 +321,10 @@ function tpr --description 'Initialize LaTeX project repositories' --argument co
             end
 
             set --function GZ $argv[1]
+            if not set --query GZ
+                __tpr_FAIL "missing positional argument GZ"; return 1
+            end
+
             set --function COMMIT $argv[2]
 
             if test -z "$COMMIT"
@@ -507,7 +346,7 @@ function tpr --description 'Initialize LaTeX project repositories' --argument co
             end
 
             if set --query _flag_help
-                __tpr_help validate; return 0
+                tpr_help validate; return 0
             end
 
             # get and validate main.tex
@@ -533,7 +372,7 @@ function tpr --description 'Initialize LaTeX project repositories' --argument co
             end
 
             if set --query _flag_help
-                __tpr_help compile; return 0
+                tpr_help compile; return 0
             end
 
             # get and validate main.tex
@@ -566,7 +405,7 @@ function tpr --description 'Initialize LaTeX project repositories' --argument co
             end
 
             if set --query _flag_help
-                __tpr_help update; return 0
+                tpr_help update; return 0
             end
 
             copier update $tpr_working_dir
