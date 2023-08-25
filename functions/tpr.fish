@@ -85,8 +85,8 @@ function __tpr_echo_usage
 end
 
 
-# add --include / -I option to tpr archive with a regex
-function __tpr_help --argument cmd
+# add tpr diff command OLD [NEW] to automatically generate a diff PDF.
+function __tpr_help --argument cmd subcmd
     switch $cmd
         case ''
             set_color cyan --bold
@@ -101,10 +101,10 @@ function __tpr_help --argument cmd
             echo '  tpr archive GZ [COMMIT]   Export files to GZ'
             echo '                              COMMIT: use commit'
             echo '  tpr remote REPONAME       Create a remote repository'
-            echo '  tpr pull                  Update existing project'
+            echo '  tpr update                Update existing project'
             echo '  tpr install NAME GIT      Install new template'
             echo '  tpr uninstall NAME        Uninstall template'
-            echo '  tpr update                Update existing templates'
+            echo '  tpr upgrade-templates     Update existing templates'
             echo
             set_color cyan --bold
             echo 'Options:'
@@ -180,25 +180,44 @@ function __tpr_help --argument cmd
             echo '`homepage`: default homepage for your reporitory'
 
 
-        case install
-            __tpr_echo_usage 'tpr install NAME GIT'
-            echo '  Install new templates with name NAME from the git repository GIT.'
-            echo '  This is an error if the template already exists: to update, run'
-            echo '  `tpr update`, and to remote a template, run `tpr remove-template`.'
-            echo
-            echo '  Templates for the project are rendered using copier. See'
-            echo
-            echo -n '    '; __tpr_echo_url 'copier.readthedocs.io/en/stable/'; echo
-            echo
-            echo '  for more details about template creation.'
+        case template
+            switch $subcmd
+                case ''
+                    set_color cyan --bold
+                    echo 'Subcommands:'
+                    set_color normal
+                    echo '  install NAME GIT    Install new template'
+                    echo '  uninstall NAME      Uninstall template'
+                    echo '  update              Update existing templates'
+                    echo
+                    echo -n 'Run '; __tpr_echo_code 'tpr help template [subcommand]'; echo ' for more information, or visit'
+                    echo -n '  '
+                    __tpr_echo_url 'github.com/alexrutar/tpr'
+                    echo
 
-        case uninstall
-            __tpr_echo_usage 'tpr uninstall NAME'
-            echo '  Uninstall the templates with name NAME.'
+                case install
+                    __tpr_echo_usage 'tpr template install NAME GIT'
+                    echo '  Install new templates with name NAME from the git repository GIT.'
+                    echo '  This is an error if the template already exists: to update, run'
+                    echo '  `tpr update`, and to remote a template, run `tpr remove-template`.'
+                    echo
+                    echo '  Templates for the project are rendered using copier. See'
+                    echo
+                    echo -n '    '; __tpr_echo_url 'copier.readthedocs.io/en/stable/'; echo
+                    echo
+                    echo '  for more details about template creation.'
 
-        case pull
-            __tpr_echo_usage 'tpr pull'
-            echo '  Apply upstream template changes to the current project.'
+                case uninstall
+                    __tpr_echo_usage 'tpr uninstall NAME'
+                    echo '  Uninstall the templates with name NAME.'
+
+                case update
+                    __tpr_echo_usage 'tpr update'
+                    echo '  Apply upstream template changes to the current project.'
+
+                case '*'
+                    __tpr_FAIL "Invalid template subcommand '$subcmd'"; return 1
+            end
 
         case '*'
             __tpr_FAIL "Invalid subcommand '$cmd'"; return 1
@@ -211,9 +230,7 @@ function tpr --description 'Initialize LaTeX project repositories' --argument co
     set --local options $options (fish_opt --short=v --long=version)
     set --local options $options (fish_opt --short=C --long=directory --required-val)
 
-    # TODO: add include options for archive (to copy bbl, pdf, etc.)
-
-    if not argparse $options -- $argv
+    if not argparse --stop-nonopt $options -- $argv
         return 1
     end
 
@@ -262,63 +279,93 @@ function tpr --description 'Initialize LaTeX project repositories' --argument co
 
     switch "$argv[1]"
         case help
-            __tpr_help $argv[2]
+            argparse --ignore-unknown -- $argv[2..]
+            __tpr_help $argv
 
 
-        case install
-            set --local NAME $argv[2]
-            set --local GIT $argv[3]
+        case template
+            switch $argv[2]
+                case install
+                    if not argparse -- $argv[3..]
+                        return 1
+                    end
 
-            if not test (count $argv) -eq 3
-                __tpr_FAIL "incorrect number of arguments"; return 1
+                    if not test (count $argv) -eq 2
+                        __tpr_FAIL "incorrect number of arguments"; return 1
+                    end
+
+                    set --local NAME $argv[1]
+                    set --local GIT $argv[2]
+
+                    set --local matched_name (string match --regex '[a-zA-Z0-9_\-]+' $NAME)
+
+                    if not test "$matched_name" = "$NAME"
+                        __tpr_FAIL "Invalid template name!"; return 1
+                    end
+
+                    if test -e "$tpr_template_dir/$NAME"
+                        __tpr_FAIL "Template with name $NAME already installed!"; return 1
+                    end
+
+                    git clone $GIT "$tpr_template_dir/$NAME" > /dev/null
+
+
+                case uninstall
+                    if not argparse -- $argv[3..]
+                        return 1
+                    end
+
+                    if not test (count $argv) -eq 1
+                        __tpr_FAIL "incorrect number of arguments"; return 1
+                    end
+
+                    set --local NAME $argv[1]
+
+                    set --local matched_name (string match --regex '[a-zA-Z0-9_\-]+' $NAME)
+
+                    if not test "$matched_name" = "$NAME"
+                        __tpr_FAIL "Invalid template name!"; return 1
+                    end
+
+                    if test -e "$tpr_template_dir/$NAME"
+                        rm -rf $tpr_template_dir/$NAME
+                    end
+
+
+                case update
+                    if not argparse -- $argv[3..]
+                        return 1
+                    end
+
+                    for file in $tpr_template_dir/*
+                        fish --command "git -C $file pull --force" &
+                        set --append pid_list (jobs --last --pid)
+                    end
+
+                    wait $pid_list 2>/dev/null
+
+
+                case '*'
+                    __tpr_FAIL "Unknown template subcommand: \"$argv[2]\""; return 1
             end
-
-            set --local matched_name (string match --regex '[a-zA-Z0-9_\-]+' $NAME)
-
-            if not test "$matched_name" = "$NAME"
-                __tpr_FAIL "Invalid template name!"; return 1
-            end
-
-            if test -e "$tpr_template_dir/$NAME"
-                __tpr_FAIL "Template with name $NAME already installed!"; return 1
-            end
-
-            git clone $GIT "$tpr_template_dir/$NAME" > /dev/null
-
-
-        case uninstall
-            set --local NAME $argv[2]
-
-            set --local matched_name (string match --regex '[a-zA-Z0-9_\-]+' $NAME)
-
-            if not test "$matched_name" = "$NAME"
-                __tpr_FAIL "Invalid template name!"; return 1
-            end
-
-            if test -e "$tpr_template_dir/$NAME"
-                rm -rf $tpr_template_dir/$NAME
-            end
-
-
-        case update
-            for file in $tpr_template_dir/*
-                fish --command "git -C $file pull --force" &
-                set --append pid_list (jobs --last --pid)
-            end
-
-            wait $pid_list 2>/dev/null
 
 
         case init
+            set --local options (fish_opt --short=F --long=force)
+            if not argparse $options -- $argv[2..]
+                return 1
+            end
+
             if string length -q -- (ls -A $tpr_working_dir)
+            and not set --query _flag_force
                 __tpr_FAIL "Working directory is not empty"; return 1
             end
 
-            if not test (count $argv) -eq 2
+            if not test (count $argv) -eq 1
                 __tpr_FAIL "missing template name"; return 1
             end
 
-            set --local TEMPLATE $argv[2]
+            set --local TEMPLATE $argv[1]
 
             set --function available_templates (__tpr_list_templates $tpr_template_dir)
             if not contains $TEMPLATE $available_templates
@@ -327,24 +374,32 @@ function tpr --description 'Initialize LaTeX project repositories' --argument co
 
             copier copy $tpr_template_dir/$TEMPLATE $tpr_working_dir
 
-            and git -C $tpr_working_dir init
-            and git -C $tpr_working_dir add -A
-            and git -C $tpr_working_dir commit -m "Initialize new project repository."
+            # not a git directory: initialize new repository
+            if not test -d $tpr_working_dir/.git
+                git -C $tpr_working_dir init
+                and git -C $tpr_working_dir add -A
+                and git -C $tpr_working_dir commit -m "Initialize new project repository."
 
-            set --local commit_file $tpr_resource_dir/pre-commit
-            if test -f "$commit_file"
-                cp $commit_file $tpr_working_dir/.git/hooks/pre-commit
+                set --local commit_file $tpr_resource_dir/pre-commit
+                if test -f "$commit_file"
+                    cp -i $commit_file $tpr_working_dir/.git/hooks/pre-commit
+                end
             end
 
 
         case remote
-            set --local REPONAME $argv[2]
-            if git -C $tpr_working_dir config --get remote.origin.url
-                __tpr_FAIL "remote 'origin' already exists"; return 1
+            if not argparse -- $argv[2..]
+                return 1
             end
 
-            if test -z "$REPONAME"
+            if not test (count $argv) -eq 1
                 __tpr_FAIL "missing remote repository name"; return 1
+            end
+
+            set --local REPONAME $argv[1]
+
+            if git -C $tpr_working_dir config --get remote.origin.url
+                __tpr_FAIL "remote 'origin' already exists"; return 1
             end
 
             set --function homepage (yq '.homepage' $tpr_config_file)
@@ -359,14 +414,24 @@ function tpr --description 'Initialize LaTeX project repositories' --argument co
             __tpr_list_templates $tpr_template_dir
 
 
+        # add --include / -I option to tpr archive with a regex
+        # add --bare option to prune all un-needed files with arxiv_latex_cleaner
         case archive export
+            set --local options (fish_opt --short=I --long=include --required-val)
+            set --local options $options (fish_opt --short=b --long=bare)
+            if not argparse $options -- $argv[2..]
+                return 1
+            end
+
             # check for all arguments and parse to variables
-            if not test (count $argv) -gt 1
+            if not test (count $argv) -gt 0
                 __tpr_FAIL "missing argument 'GZ'"; return 1
             end
 
-            set --function GZ $argv[2]
-            set --function COMMIT $argv[3]
+            set --function GZ $argv[1]
+            set --function COMMIT $argv[2]
+
+            echo $GZ
 
             if test -z "$COMMIT"
                 # if no commit is provided, populate $tarfile with current contents
@@ -382,13 +447,17 @@ function tpr --description 'Initialize LaTeX project repositories' --argument co
 
 
         case validate
+            if not argparse -- $argv[2..]
+                return 1
+            end
+
             # get and validate main.tex
             set --local main_tex (__tpr_main_tex $tpr_working_dir)
             if not test -f "$tpr_working_dir/$main_tex"
                 __tpr_FAIL "no tex file specified with .latexmain"; return 1
             end
 
-            set --local COMMIT $argv[2]
+            set --local COMMIT $argv[1]
 
             # make tempdir with latex contents
             set --local temp_dir (__tpr_make_tempdir $tpr_working_dir $COMMIT)
@@ -400,6 +469,10 @@ function tpr --description 'Initialize LaTeX project repositories' --argument co
 
 
         case compile
+            if not argparse -- $argv[2..]
+                return 1
+            end
+
             # get and validate main.tex
             set --local main_tex (__tpr_main_tex $tpr_working_dir)
             if not test -f "$tpr_working_dir/$main_tex"
@@ -407,12 +480,12 @@ function tpr --description 'Initialize LaTeX project repositories' --argument co
             end
 
             # check for all arguments and parse to variables
-            if not test (count $argv) -gt 1
+            if not test (count $argv) -gt 0
                 __tpr_FAIL "missing argument 'PDF'"; return 1
             end
 
-            set --local PDF $argv[2]
-            set --local COMMIT $argv[3]
+            set --local PDF $argv[1]
+            set --local COMMIT $argv[2]
 
             # make tempdir with latex contents
             set --local temp_dir (__tpr_make_tempdir $tpr_working_dir $COMMIT)
@@ -424,7 +497,11 @@ function tpr --description 'Initialize LaTeX project repositories' --argument co
             and mv -i (path change-extension pdf $temp_dir/$main_tex) $PDF
 
 
-        case pull
+        case update
+            if not argparse -- $argv[2..]
+                return 1
+            end
+
             copier update $tpr_working_dir
 
 
