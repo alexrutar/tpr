@@ -6,6 +6,7 @@ set --local tpr_dir /Users/alexrutar/Documents/20_29-Programming/20-Development/
 set --local test_dir $tpr_dir/test
 set --local test_tempdir $test_dir/temp
 
+# create test directory
 mkdir $test_tempdir
 cd $test_tempdir
 
@@ -29,21 +30,11 @@ end
 
 # TESTING
 # -------
-
-# __tpr_test init preprint
-# __tpr_test init plain
-# __tpr_test template install "test-preprint" https://github.com/rutar-academic/template-preprint
-# __tpr_test template uninstall "test-preprint"
-# __tpr_test help template
-# __tpr_test help template update
-__tpr_test --help
-__tpr_test template --help
-__tpr_test template list --help
-__tpr_test validate --help
-__tpr_test archive --help
-# __tpr_test init preprint
-# __tpr_test archive out.tar.gz
-# ls
+#
+__tpr_test init preprint
+__tpr_test archive out.tar.gz
+__tpr_test compile out.pdf
+ls
 
 # CLEANUP
 # -------

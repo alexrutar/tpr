@@ -1,7 +1,13 @@
 function __tpr_FAIL --argument message
-    set_color red; echo -n "Error: "; set_color normal
+    set_color red; echo -n "Error: " >&2; set_color normal
     echo $message >&2
     return 1
+end
+
+
+function __tpr_WARN --argument message
+    set_color yellow; echo -n "Warning: " >&2; set_color normal
+    echo $message >&2
 end
 
 
@@ -27,28 +33,41 @@ function __tpr_compile --argument texfile
 end
 
 
-function __tpr_make_tempdir --description "archive the current directory to a temporary tarfile" --argument tpr_working_dir commit
-    set --local temp_dir (mktemp --directory)
-    trap "rm -rf $temp_dir" INT TERM HUP EXIT
+function __tpr_tar --argument source_dir tarfile
+    fd -H --exclude '.git' --base-directory $source_dir --print0 | xargs -0 tar -rf $tarfile -C $source_dir
+end
 
-    set --local tarfile (mktemp)
-    trap "rm -f $tarfile" INT TERM HUP EXIT
+
+function __tpr_populate_tempdir --description "archive the current directory to a temporary tarfile" --argument temp_dir tpr_working_dir commit
+    # get and validate main.tex
+    set --local main_tex (__tpr_main_tex $tpr_working_dir)
+    if not test -f "$tpr_working_dir/$main_tex"
+        __tpr_FAIL "no tex file specified with .latexmain"; return 1
+    end
 
     if test -n "$commit" >/dev/null
         # use `git archive` to dump to $tarfile if commit specified
-        if not git -C $tpr_working_dir archive --format=tar $commit --output $tarfile
+        if not git -C $tpr_working_dir archive --format=tar $commit --output $temp_dir/source.tar
             return 1
         end
     else
         # otherwise, populate $tarfile with current contents
-        if not fd -H --exclude '.git' --base-directory $tpr_working_dir --print0 | xargs -0 tar -rf $tarfile -C $tpr_working_dir
+        if not __tpr_tar $tpr_working_dir $temp_dir/source.tar
             return 1
         end
     end
 
-    # untar and return tempdir on success
-    tar -xf $tarfile -C $temp_dir
-    and echo $temp_dir
+    # untar
+    mkdir $temp_dir/source
+    tar -xf $temp_dir/source.tar -C $temp_dir/source
+
+    # check that archive was generated properly
+    if not test -f "$temp_dir/source/$main_tex"
+        __tpr_FAIL "failed to generate archive"; return 1
+    end
+
+    # if so, return
+    echo "$main_tex"
 end
 
 
@@ -110,6 +129,10 @@ function tpr --description 'Initialize LaTeX project repositories' --argument co
     if test (count $argv) -eq 0
         tpr_help; return 1
     end
+
+    set --local temp_dir (mktemp --directory)
+    trap "rm -rf $temp_dir" INT TERM HUP EXIT
+
 
     set --local options (fish_opt --short=h --long=help)
     switch "$argv[1]"
@@ -311,10 +334,6 @@ function tpr --description 'Initialize LaTeX project repositories' --argument co
                 tpr_help archive; return 0
             end
 
-            if set --query _flag_include
-                echo $_flag_include
-            end
-
             # check for all arguments and parse to variables
             if not test (count $argv) -gt 0
                 __tpr_FAIL "missing argument 'GZ'"; return 1
@@ -327,17 +346,32 @@ function tpr --description 'Initialize LaTeX project repositories' --argument co
 
             set --function COMMIT $argv[2]
 
-            if test -z "$COMMIT"
-                # if no commit is provided, populate $tarfile with current contents
-                if not git -C $tpr_working_dir ls-files -z | xargs -0 tar -czf $GZ -C $tpr_working_dir
-                    return 1
-                end
-            else
-                # otherwise, use `git archive` to dump to $tarfile
-                if not git -C $tpr_working_dir archive --format=tar.gz $COMMIT --output $GZ
-                    return 1
+            set --local main_tex (__tpr_populate_tempdir $temp_dir $tpr_working_dir $COMMIT)
+            or return 1
+
+            # if --bare: replace tarfile with modified contents
+            if set --query _flag_bare
+                arxiv_latex_cleaner $temp_dir/source
+                rm --force $temp_dir/source.tar
+                __tpr_tar $temp_dir/source_arXiv $temp_dir/source.tar
+            end
+
+            # include additional requested files
+            if set --query _flag_include
+                __tpr_compile "$temp_dir/source/$main_tex"
+                for file_end in $_flag_include
+                    set --local include_file (path change-extension $file_end $main_tex)
+                    if test -f $temp_dir/source/$include_file
+                        tar -rf $temp_dir/source.tar -C $temp_dir/source (path change-extension $file_end $main_tex)
+                    else
+                        __tpr_WARN "File '$include_file' was not generated before or during compilation."
+                    end
                 end
             end
+
+            # compress tarfile and export
+            gzip -9 $temp_dir/source.tar
+            and mv -i $temp_dir/source.tar.gz $GZ
 
 
         case validate
@@ -349,21 +383,12 @@ function tpr --description 'Initialize LaTeX project repositories' --argument co
                 tpr_help validate; return 0
             end
 
-            # get and validate main.tex
-            set --local main_tex (__tpr_main_tex $tpr_working_dir)
-            if not test -f "$tpr_working_dir/$main_tex"
-                __tpr_FAIL "no tex file specified with .latexmain"; return 1
-            end
-
             set --local COMMIT $argv[1]
 
-            # make tempdir with latex contents
-            set --local temp_dir (__tpr_make_tempdir $tpr_working_dir $COMMIT)
-            if not test -f "$temp_dir/$main_tex"
-                __tpr_FAIL "failed to generate archive"; return 1
-            end
+            set --local main_tex (__tpr_populate_tempdir $temp_dir $tpr_working_dir $COMMIT)
+            or return 1
 
-            __tpr_compile $temp_dir/$main_tex
+            __tpr_compile "$temp_dir/source/$main_tex"
 
 
         case compile
@@ -375,28 +400,18 @@ function tpr --description 'Initialize LaTeX project repositories' --argument co
                 tpr_help compile; return 0
             end
 
-            # get and validate main.tex
-            set --local main_tex (__tpr_main_tex $tpr_working_dir)
-            if not test -f "$tpr_working_dir/$main_tex"
-                __tpr_FAIL "no tex file specified with .latexmain"; return 1
-            end
-
-            # check for all arguments and parse to variables
-            if not test (count $argv) -gt 0
-                __tpr_FAIL "missing argument 'PDF'"; return 1
-            end
-
             set --local PDF $argv[1]
+            if not set --query PDF
+                __tpr_FAIL "missing positional argument PDF"; return 1
+            end
+
             set --local COMMIT $argv[2]
 
-            # make tempdir with latex contents
-            set --local temp_dir (__tpr_make_tempdir $tpr_working_dir $COMMIT)
-            if not test -f "$temp_dir/$main_tex"
-                __tpr_FAIL "failed to generate archive"; return 1
-            end
+            set --local main_tex (__tpr_populate_tempdir $temp_dir $tpr_working_dir $COMMIT)
+            or return 1
 
-            __tpr_compile $temp_dir/$main_tex
-            and mv -i (path change-extension pdf $temp_dir/$main_tex) $PDF
+            __tpr_compile "$temp_dir/source/$main_tex"
+            and mv -i (path change-extension pdf $temp_dir/source/$main_tex) $PDF
 
 
         case update
