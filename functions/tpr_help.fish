@@ -48,7 +48,7 @@ function tpr_help --argument cmd
             echo 'Options:'
             set_color normal
             echo '  -h/--help                 Print help and exit.'
-            echo '  -v/-version              Print version and exit.'
+            echo '  -v/-version               Print version and exit.'
             echo '  -C/--directory            Specify working directory (default: .)'
             echo
             echo -n 'Run '; __tpr_echo_code 'tpr [subcommand] --help'; echo ' for more information, or visit'
@@ -65,7 +65,7 @@ function tpr_help --argument cmd
             echo '.'
 
         case compile
-            __tpr_echo_usage 'tpr compile PDF'
+            __tpr_echo_usage 'tpr compile PDF [COMMIT]'
             echo '  Compile tex file specified with .latexmain in the current directory'
             echo '  and check for errors. Output the compiled file to PDF.'
             echo
@@ -75,7 +75,7 @@ function tpr_help --argument cmd
             echo -n '  The COMMIT argument is used as the argument to '; __tpr_echo_code 'git archive'; echo '.'
 
         case validate
-            __tpr_echo_usage 'tpr validate'
+            __tpr_echo_usage 'tpr validate [COMMIT]'
             echo '  Compile tex file specified with .latexmain in the current'
             echo '  directory and check for errors. The command used is'
             echo
@@ -86,9 +86,15 @@ function tpr_help --argument cmd
 
         case archive
             __tpr_echo_usage 'tpr archive GZ [COMMIT]'
-            echo '  Export files in the current repository as a g-zipped archive'
-            echo '  to the file specified with GZ. The export respects'
-            echo '  your .gitignore.'
+            set_color cyan --bold; echo 'Options:'; set_color normal
+            echo '  -I/--include EXTENSION   Include additional files in archive.'
+            echo '  -b/--bare                Clean export files.'
+            echo
+            echo '  Export files in the current repository as a gzipped archive'
+            echo '  to the file GZ. The export respects your .gitignore. Include'
+            echo '  additional files with -I. Clean export files with --bare,'
+            echo '  which automatically removes all files not required for'
+            echo '  compilation and removes comments from .tex files.'
             echo
             echo '  If COMMIT is given, use the commit specified by COMMIT.'
             echo -n '  The COMMIT argument is used as the argument to '; __tpr_echo_code 'git archive'; echo '.'

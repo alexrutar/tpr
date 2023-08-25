@@ -67,6 +67,11 @@ To export the project, run
 tpr archive out.tar.gz
 ```
 to create an archive file `out.tar.gz`.
+You can include additional files in the archive with `-I` and strip unnecessary comments and unneeded files with `--bare`.
+For example, to prepare files for submission to [arXiv](https://arxiv.org), one might run
+```fish
+tpr archive --bare -I bbl arxiv.tar.gz
+```
 
 ### More help
 Run
