@@ -36,7 +36,9 @@ end
 # __tpr_test template uninstall "test-preprint"
 # __tpr_test help template
 # __tpr_test help template update
-__tpr_test template
+__tpr_test init preprint
+__tpr_test archive out.tar.gz
+__tpr_test archive out.tar.gz -I pdf -I bbl
 # __tpr_test init preprint
 # __tpr_test archive out.tar.gz
 # ls
