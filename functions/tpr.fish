@@ -78,7 +78,6 @@ function __tpr_list_templates --argument template_directory
 end
 
 
-# add tpr diff command OLD [NEW] to automatically generate a diff PDF.
 function tpr --description 'Initialize LaTeX project repositories' --argument command
     set --local options (fish_opt --short=h --long=help)
     set --local options $options (fish_opt --short=v --long=version)
@@ -88,7 +87,7 @@ function tpr --description 'Initialize LaTeX project repositories' --argument co
         return 1
     end
 
-    set --function tpr_version 0.3
+    set --function tpr_version 0.4
 
     # catch help and version flags
     if set --query _flag_help
@@ -321,7 +320,6 @@ function tpr --description 'Initialize LaTeX project repositories' --argument co
 
 
         # add --include / -I option to tpr archive with a regex
-        # add --bare option to prune all un-needed files with arxiv_latex_cleaner
         case archive export
             set --local options $options (fish_opt --short=I --long=include --multiple-vals)
             set --local options $options (fish_opt --short=b --long=bare)
@@ -372,6 +370,37 @@ function tpr --description 'Initialize LaTeX project repositories' --argument co
             # compress tarfile and export
             gzip -9 $temp_dir/source.tar
             and mv -i $temp_dir/source.tar.gz $GZ
+
+
+        case diff
+            if not argparse $options -- $argv[2..]
+                return 1
+            end
+
+            if set --query _flag_help
+                tpr_help diff; return 0
+            end
+
+            set --function PDF $argv[1]
+            if not set --query PDF
+                __tpr_FAIL "missing positional argument PDF"; return 1
+            end
+
+            set --function COMMIT $argv[2]
+            if not set --query COMMIT
+                __tpr_FAIL "missing positional argument COMMIT"; return 1
+            end
+
+            set --function REV $argv[2]
+
+            set --local main_tex (__tpr_populate_tempdir $temp_dir $tpr_working_dir $REV)
+            or return 1
+
+            set --local diff_tex (path change-extension '' $temp_dir/source/$main_tex)-diff.tex
+
+            latexdiff (git show $COMMIT:$main_tex | psub) $main_tex > $diff_tex
+            and __tpr_compile $diff_tex
+            and mv -i  (path change-extension pdf $diff_tex) $PDF
 
 
         case validate

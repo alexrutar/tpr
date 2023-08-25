@@ -30,19 +30,17 @@ function tpr_help --argument cmd
             set_color cyan --bold
             echo 'Usage:'
             set_color normal
-            echo '  tpr init TEMPLATE         Create new project from TEMPLATE'
-            echo '  tpr template ...          Various subcommands for managing templates'
-            echo '  tpr compile PDF [COMMIT]  Compile and output to PDF'
-            echo '                              COMMIT: use commit'
-            echo '  tpr validate [COMMIT]     Verify compilation'
-            echo '                              COMMIT: use commit'
-            echo '  tpr archive GZ [COMMIT]   Export files to GZ'
-            echo '                              COMMIT: use commit'
-            echo '  tpr remote REPONAME       Create a remote repository'
-            echo '  tpr update                Update existing project'
-            echo '  tpr install NAME GIT      Install new template'
-            echo '  tpr uninstall NAME        Uninstall template'
-            echo '  tpr upgrade-templates     Update existing templates'
+            echo '  tpr init TEMPLATE          Create new project from TEMPLATE'
+            echo '  tpr template ...           Subcommands for managing templates'
+            echo '  tpr compile PDF [COMMIT]   Compile and output to PDF'
+            echo '                               COMMIT: use commit'
+            echo '  tpr validate [COMMIT]      Verify compilation'
+            echo '                               COMMIT: use commit'
+            echo '  tpr archive GZ [COMMIT]    Export files to GZ'
+            echo '                               COMMIT: use commit'
+            echo '  tpr remote REPONAME        Create a remote repository'
+            echo '  tpr update                 Update existing project'
+            echo '  tpr diff PDF COMMIT [REV]  Create diff PDF'
             echo
             set_color cyan --bold
             echo 'Options:'
@@ -73,6 +71,12 @@ function tpr_help --argument cmd
             echo
             echo '  If COMMIT is given, use the commit specified by COMMIT.'
             echo -n '  The COMMIT argument is used as the argument to '; __tpr_echo_code 'git archive'; echo '.'
+
+        case diff
+            __tpr_echo_usage 'tpr diff PDF COMMIT [REV]'
+            echo '  Create a diff PDF showing changes between COMMIT and HEAD.'
+            echo '  If REV is given, instead show changes between COMMIT and'
+            echo '  REV.'
 
         case validate
             __tpr_echo_usage 'tpr validate [COMMIT]'
