@@ -242,7 +242,7 @@ function tpr --description 'Initialize LaTeX project repositories' --argument co
     end
 
     if set --query _flag_version
-        echo "tpr, version $tpr_version"
+        echo "tpr (version $tpr_version)"
         return 0
     end
 
@@ -339,8 +339,7 @@ function tpr --description 'Initialize LaTeX project repositories' --argument co
                     end
 
                     if set --query _flag_help
-                        __tpr_help template-uninstall
-                        return 0
+                        __tpr_help template-uninstall; return 0
                     end
 
                     # first positional
@@ -368,8 +367,7 @@ function tpr --description 'Initialize LaTeX project repositories' --argument co
                     end
 
                     if set --query _flag_help
-                        __tpr_help template-update
-                        return 0
+                        __tpr_help template-update; return 0
                     end
 
                     for file in $tpr_template_dir/*
@@ -387,8 +385,7 @@ function tpr --description 'Initialize LaTeX project repositories' --argument co
                     end
 
                     if set --query _flag_help
-                        __tpr_help template-list
-                        return 0
+                        __tpr_help template-list; return 0
                     end
 
                     __tpr_list_templates $tpr_template_dir
@@ -406,8 +403,7 @@ function tpr --description 'Initialize LaTeX project repositories' --argument co
             end
 
             if set --query _flag_help
-                __tpr_help init
-                return 0
+                __tpr_help init; return 0
             end
 
             if string length -q -- (ls -A $tpr_working_dir)
@@ -446,8 +442,7 @@ function tpr --description 'Initialize LaTeX project repositories' --argument co
             end
 
             if set --query _flag_help
-                __tpr_help remote
-                return 0
+                __tpr_help remote; return 0
             end
 
             set --local REPONAME $argv[1]
@@ -478,8 +473,7 @@ function tpr --description 'Initialize LaTeX project repositories' --argument co
             end
 
             if set --query _flag_help
-                __tpr_help archive
-                return 0
+                __tpr_help archive; return 0
             end
 
             if set --query _flag_include
@@ -513,8 +507,7 @@ function tpr --description 'Initialize LaTeX project repositories' --argument co
             end
 
             if set --query _flag_help
-                __tpr_help validate
-                return 0
+                __tpr_help validate; return 0
             end
 
             # get and validate main.tex
@@ -540,8 +533,7 @@ function tpr --description 'Initialize LaTeX project repositories' --argument co
             end
 
             if set --query _flag_help
-                __tpr_help compile
-                return 0
+                __tpr_help compile; return 0
             end
 
             # get and validate main.tex
@@ -574,8 +566,7 @@ function tpr --description 'Initialize LaTeX project repositories' --argument co
             end
 
             if set --query _flag_help
-                __tpr_help update
-                return 0
+                __tpr_help update; return 0
             end
 
             copier update $tpr_working_dir

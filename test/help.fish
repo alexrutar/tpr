@@ -31,6 +31,7 @@ end
 # -------
 
 __tpr_test --help
+__tpr_test --version
 __tpr_test template --help
 __tpr_test template list --help
 __tpr_test template install --help
