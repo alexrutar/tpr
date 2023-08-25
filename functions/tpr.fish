@@ -33,6 +33,11 @@ function __tpr_compile --argument texfile
 end
 
 
+function __tpr_compile_force --argument texfile
+    latexmk -pdf -f -interaction=nonstopmode -silent -cd $texfile > /dev/null
+end
+
+
 function __tpr_tar --argument source_dir tarfile
     fd -H --exclude '.git' --base-directory $source_dir --print0 | xargs -0 tar -rf $tarfile -C $source_dir
 end
@@ -399,7 +404,7 @@ function tpr --description 'Initialize LaTeX project repositories' --argument co
             set --local diff_tex (path change-extension '' $temp_dir/source/$main_tex)-diff.tex
 
             latexdiff (git show $COMMIT:$main_tex | psub) $main_tex > $diff_tex
-            and __tpr_compile $diff_tex
+            and __tpr_compile_force $diff_tex
             and mv -i  (path change-extension pdf $diff_tex) $PDF
 
 
