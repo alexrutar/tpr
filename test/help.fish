@@ -39,6 +39,7 @@ __tpr_test template uninstall --help
 __tpr_test validate --help
 __tpr_test compile --help
 __tpr_test archive --help
+__tpr_test diff --help
 
 # CLEANUP
 # -------
