@@ -403,9 +403,12 @@ function tpr --description 'Initialize LaTeX project repositories' --argument co
 
             set --local diff_tex (path change-extension '' $temp_dir/source/$main_tex)-diff.tex
 
-            latexdiff (git show $COMMIT:$main_tex | psub) $main_tex > $diff_tex
-            and __tpr_compile_force $diff_tex
-            and mv -i  (path change-extension pdf $diff_tex) $PDF
+            if latexdiff (git show $COMMIT:$main_tex | psub) $main_tex > $diff_tex
+                and __tpr_compile_force $diff_tex
+                mv -i  (path change-extension pdf $diff_tex) $PDF
+            else
+                __tpr_FAIL "Failed to compile diff file"; return 1
+            end
 
 
         case validate
