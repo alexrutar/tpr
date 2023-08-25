@@ -279,6 +279,7 @@ function tpr --description 'Initialize LaTeX project repositories' --argument co
 
     switch "$argv[1]"
         case help
+            # eat all of the invalid options
             argparse --ignore-unknown -- $argv[2..]
             __tpr_help $argv
 
@@ -421,10 +422,14 @@ function tpr --description 'Initialize LaTeX project repositories' --argument co
         # add --include / -I option to tpr archive with a regex
         # add --bare option to prune all un-needed files with arxiv_latex_cleaner
         case archive export
-            set --local options (fish_opt --short=I --long=include --required-val)
+            set --local options (fish_opt --short=I --long=include --multiple-vals)
             set --local options $options (fish_opt --short=b --long=bare)
             if not argparse $options -- $argv[2..]
                 return 1
+            end
+
+            if set --query _flag_include
+                echo $_flag_include
             end
 
             # check for all arguments and parse to variables
@@ -434,8 +439,6 @@ function tpr --description 'Initialize LaTeX project repositories' --argument co
 
             set --function GZ $argv[1]
             set --function COMMIT $argv[2]
-
-            echo $GZ
 
             if test -z "$COMMIT"
                 # if no commit is provided, populate $tarfile with current contents
