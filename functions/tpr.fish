@@ -93,7 +93,7 @@ function __tpr_help --argument cmd subcmd
             echo 'Usage:'
             set_color normal
             echo '  tpr init TEMPLATE         Create new project from TEMPLATE'
-            echo '  tpr list                  List available templates'
+            echo '  tpr template ...          Various subcommands for managing templates'
             echo '  tpr compile PDF [COMMIT]  Compile and output to PDF'
             echo '                              COMMIT: use commit'
             echo '  tpr validate [COMMIT]     Verify compilation'
@@ -124,13 +124,6 @@ function __tpr_help --argument cmd subcmd
             echo '  For information about template specification and installation,'
             echo -n '  run '
             __tpr_echo_code 'tpr help install'
-            echo '.'
-
-        case list
-            __tpr_echo_usage 'tpr list'
-            echo '  List all available templates. Install or update templates'
-            echo -n '  with '
-            __tpr_echo_code 'tpr install'
             echo '.'
 
         case compile
@@ -212,8 +205,15 @@ function __tpr_help --argument cmd subcmd
                     echo '  Uninstall the templates with name NAME.'
 
                 case update
-                    __tpr_echo_usage 'tpr update'
+                    __tpr_echo_usage 'tpr template update'
                     echo '  Apply upstream template changes to the current project.'
+
+                case list
+                    __tpr_echo_usage 'tpr template list'
+                    echo '  List all available templates. Install or update templates'
+                    echo -n '  with '
+                    __tpr_echo_code 'tpr install'
+                    echo '.'
 
                 case '*'
                     __tpr_FAIL "Invalid template subcommand '$subcmd'"; return 1
@@ -345,6 +345,10 @@ function tpr --description 'Initialize LaTeX project repositories' --argument co
                     wait $pid_list 2>/dev/null
 
 
+                case list ls
+                    __tpr_list_templates $tpr_template_dir
+
+
                 case '*'
                     __tpr_FAIL "Unknown template subcommand: \"$argv[2]\""; return 1
             end
@@ -408,10 +412,6 @@ function tpr --description 'Initialize LaTeX project repositories' --argument co
             end
 
             gh repo create $REPONAME --remote origin --source $tpr_working_dir --disable-issues --disable-wiki --private --push $homepage_opt
-
-
-        case list ls
-            __tpr_list_templates $tpr_template_dir
 
 
         # add --include / -I option to tpr archive with a regex

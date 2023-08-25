@@ -30,11 +30,12 @@ end
 # TESTING
 # -------
 
-__tpr_test help list
+__tpr_test help validate
+__tpr_test help template list
 __tpr_test help template install
 __tpr_test help template
 __tpr_test help template update
-__tpr_test list
+__tpr_test template list
 __tpr_test template install "test-preprint" https://github.com/rutar-academic/template-preprint
 __tpr_test list
 __tpr_test init preprint
