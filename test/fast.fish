@@ -31,11 +31,17 @@ end
 # TESTING
 # -------
 #
-# __tpr_test init preprint
+__tpr_test init preprint
 # __tpr_test archive out.tar.gz
+# __tpr_test archive out --format dir
+# __tpr_test archive out --format dir
+touch out-bare
+__tpr_test archive out-bare --format dir --bare --force
+ls -A out-bare
+ls -A
 # __tpr_test compile out.pdf
 # ls
-__tpr_test diff diff.pdf @~1
+# __tpr_test diff diff.pdf @~1
 
 # CLEANUP
 # -------

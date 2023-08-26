@@ -108,11 +108,7 @@ function tpr_help --argument cmd
             echo '  If the dir option is specified, write output to the specified'
             echo '  directory instead.'
             echo
-            echo '  If the tar or gz options are used and OUT, prompt to'
-            echo '  overwrite, unless the --force option is used. If the dir option'
-            echo '  is used and OUT exists, fail unless the --force option is used'
-            echo '  in which case the files are written to the directory, overwriting'
-            echo '  if necessary.'
+            echo '  If the --force option is used, delete OUT before archiving.'
             echo
             echo '  If COMMIT is given, use the commit specified by COMMIT.'
             echo -n '  The COMMIT argument is used as the argument to '; __tpr_echo_code 'git archive'; echo '.'

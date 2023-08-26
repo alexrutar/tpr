@@ -357,6 +357,13 @@ function tpr --description 'Initialize LaTeX project repositories' --argument co
                 __tpr_FAIL "missing positional argument OUT"; return 1
             end
 
+            # if force, delete OUT
+            # it is important to do this now in case the file is in the current directory
+            # in which case the old version would be included in the archive
+            if set --query _flag_force
+                rm --recursive --force $OUT
+            end
+
             set --function COMMIT $argv[2]
 
             set --local main_tex (__tpr_populate_tempdir $temp_dir $tpr_working_dir $COMMIT)
@@ -374,7 +381,8 @@ function tpr --description 'Initialize LaTeX project repositories' --argument co
 
             # include additional requested files
             if set --query _flag_include
-                __tpr_compile "$temp_dir/source/$main_tex"
+                __tpr_compile_force "$temp_dir/source/$main_tex"
+                or __tpr_WARN "Compilation failed: some files may not be included."
                 for file_end in $_flag_include
                     set --local include_file (path change-extension $file_end $main_tex)
                     if test -f $temp_dir/source/$include_file
@@ -386,17 +394,12 @@ function tpr --description 'Initialize LaTeX project repositories' --argument co
             end
 
             # compress tarfile and export
-            if set --query _flag_force
-                set --function mv_opts --force
-            else
-                set --function mv_opts --interactive
-            end
             switch $FORMAT
                 case gz
                     gzip -9 $temp_dir/source.tar
-                    and mv $mv_opts $temp_dir/source.tar.gz $OUT
+                    and mv --interactive $temp_dir/source.tar.gz $OUT
                 case tar
-                    mv $mv_opts $temp_dir/source.tar $OUT
+                    mv --interactive $temp_dir/source.tar $OUT
                 case dir
                     if not set --query _flag_force
                         and test -e $OUT
