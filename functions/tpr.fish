@@ -356,6 +356,7 @@ function tpr --description 'Initialize LaTeX project repositories' --argument co
             if set --query _flag_bare
                 arxiv_latex_cleaner $temp_dir/source
                 rm --force $temp_dir/source.tar
+                rm --force $temp_dir/source_arXiv/$main_tex.latexmain
                 __tpr_tar $temp_dir/source_arXiv $temp_dir/source.tar
             end
 
