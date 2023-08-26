@@ -36,7 +36,7 @@ function tpr_help --argument cmd
             echo '                               COMMIT: use commit'
             echo '  tpr validate [COMMIT]      Verify compilation'
             echo '                               COMMIT: use commit'
-            echo '  tpr archive GZ [COMMIT]    Export files to GZ'
+            echo '  tpr archive OUT [COMMIT]   Export files to OUT'
             echo '                               COMMIT: use commit'
             echo '  tpr remote REPONAME        Create a remote repository'
             echo '  tpr update                 Update existing project'
@@ -89,16 +89,30 @@ function tpr_help --argument cmd
             echo -n '  The COMMIT argument is used as the argument to '; __tpr_echo_code 'git archive'; echo '.'
 
         case archive
-            __tpr_echo_usage 'tpr archive GZ [COMMIT]'
+            __tpr_echo_usage 'tpr archive OUT [COMMIT]'
             set_color cyan --bold; echo 'Options:'; set_color normal
-            echo '  -I/--include EXTENSION   Include additional files in archive.'
-            echo '  -b/--bare                Clean export files.'
+            echo '  -b/--bare                 Clean export files.'
+            echo '  -I/--include EXTENSION    Include additional files in archive.'
+            echo '  -f/--force                Overwrite OUT.'
+            echo '  -F/--format [tar|gz|dir]  Format of the archive (default: gz).'
             echo
-            echo '  Export files in the current repository as a gzipped archive'
-            echo '  to the file GZ. The export respects your .gitignore. Include'
-            echo '  additional files with -I. Clean export files with --bare,'
-            echo '  which automatically removes all files not required for'
-            echo '  compilation and removes comments from .tex files.'
+            echo '  Export files in the current repository to the file OUT.'
+            echo '  The export respects your .gitignore. Include additional files'
+            echo '  with -I. Clean export files with --bare, which automatically'
+            echo '  removes all files not required for compilation and removes'
+            echo '  comments from .tex files.'
+            echo
+            echo '  Specify the format of the output with --format. If tar or gz,'
+            echo '  create a (compressed) tarball with the contents. The tarball'
+            echo '  will extract directly into the directory in which it is opened.'
+            echo '  If the dir option is specified, write output to the specified'
+            echo '  directory instead.'
+            echo
+            echo '  If the tar or gz options are used and OUT, prompt to'
+            echo '  overwrite, unless the --force option is used. If the dir option'
+            echo '  is used and OUT exists, fail unless the --force option is used'
+            echo '  in which case the files are written to the directory, overwriting'
+            echo '  if necessary.'
             echo
             echo '  If COMMIT is given, use the commit specified by COMMIT.'
             echo -n '  The COMMIT argument is used as the argument to '; __tpr_echo_code 'git archive'; echo '.'

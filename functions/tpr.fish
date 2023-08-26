@@ -331,6 +331,8 @@ function tpr --description 'Initialize LaTeX project repositories' --argument co
         case archive export
             set --local options $options (fish_opt --short=I --long=include --multiple-vals)
             set --local options $options (fish_opt --short=b --long=bare)
+            set --local options $options (fish_opt --short=f --long=force)
+            set --local options $options (fish_opt --short=F --long=format --required-val)
 
             if not argparse $options -- $argv[2..]
                 return 1
@@ -340,9 +342,19 @@ function tpr --description 'Initialize LaTeX project repositories' --argument co
                 tpr_help archive; return 0
             end
 
-            set --function GZ $argv[1]
-            if not set --query GZ
-                __tpr_FAIL "missing positional argument GZ"; return 1
+            if set --query _flag_format
+                set --local allowed_formats gz tar dir
+                set --function FORMAT $_flag_format
+                if not contains $FORMAT $allowed_formats
+                    __tpr_FAIL "invalid option for --format: $FORMAT"
+                end
+            else
+                set --function FORMAT gz
+            end
+
+            set --function OUT $argv[1]
+            if not set --query OUT
+                __tpr_FAIL "missing positional argument OUT"; return 1
             end
 
             set --function COMMIT $argv[2]
@@ -353,8 +365,10 @@ function tpr --description 'Initialize LaTeX project repositories' --argument co
             # if --bare: replace tarfile with modified contents
             if set --query _flag_bare
                 arxiv_latex_cleaner $temp_dir/source
-                rm --force $temp_dir/source.tar
                 rm --force $temp_dir/source_arXiv/$main_tex.latexmain
+                rm --force $temp_dir/source_arXiv/.copier-answers.yml
+
+                rm --force $temp_dir/source.tar
                 __tpr_tar $temp_dir/source_arXiv $temp_dir/source.tar
             end
 
@@ -372,8 +386,25 @@ function tpr --description 'Initialize LaTeX project repositories' --argument co
             end
 
             # compress tarfile and export
-            gzip -9 $temp_dir/source.tar
-            and mv -i $temp_dir/source.tar.gz $GZ
+            if set --query _flag_force
+                set --function mv_opts --force
+            else
+                set --function mv_opts --interactive
+            end
+            switch $FORMAT
+                case gz
+                    gzip -9 $temp_dir/source.tar
+                    and mv $mv_opts $temp_dir/source.tar.gz $OUT
+                case tar
+                    mv $mv_opts $temp_dir/source.tar $OUT
+                case dir
+                    if not set --query _flag_force
+                        and test -e $OUT
+                        __tpr_FAIL "File or directory '$OUT' already exists. Override with --force."
+                    end
+                    mkdir --parents $OUT
+                    and tar -xf $temp_dir/source.tar -C $OUT
+            end
 
 
         case diff
