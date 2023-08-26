@@ -143,7 +143,7 @@ function tpr --description 'Manage LaTeX project repositories' --argument comman
             end
 
             # parse options and catch help
-            argparse --stop-nonopt $options -- $argv[2..]
+            argparse --name "tpr template" --stop-nonopt $options -- $argv[2..]
             or return 1
 
             if set --query _flag_help
@@ -158,7 +158,7 @@ function tpr --description 'Manage LaTeX project repositories' --argument comman
             switch $argv[1]
                 case install
                     # parse options and catch help
-                    argparse $options -- $argv[2..]
+                    argparse --name "tpr template install" --min-args 1 --max-args 1 $options -- $argv[2..]
                     or return 1
 
                     if set --query _flag_help
@@ -194,7 +194,7 @@ function tpr --description 'Manage LaTeX project repositories' --argument comman
 
                 case uninstall
                     # parse options and catch help
-                    argparse $options -- $argv[2..]
+                    argparse --name "tpr template uninstall" --min-args 1 --max-args 1 $options -- $argv[2..]
                     or return 1
 
                     if set --query _flag_help
@@ -221,7 +221,7 @@ function tpr --description 'Manage LaTeX project repositories' --argument comman
 
                 case update
                     # parse options and catch help
-                    argparse $options -- $argv[2..]
+                    argparse --name "tpr template update" --max-args 0 $options -- $argv[2..]
                     or return 1
 
                     if set --query _flag_help
@@ -236,9 +236,9 @@ function tpr --description 'Manage LaTeX project repositories' --argument comman
                     wait $pid_list 2>/dev/null
 
 
-                case list ls
+                case list
                     # parse options and catch help
-                    argparse $options -- $argv[2..]
+                    argparse --name "tpr template list" --max-args 0 $options -- $argv[2..]
                     or return 1
 
                     if set --query _flag_help
@@ -258,7 +258,7 @@ function tpr --description 'Manage LaTeX project repositories' --argument comman
                 __tpr_FAIL "Dependency `copier` missing: command `tpr init` not supported"; return 1
             end
             set --local options $options (fish_opt --short=F --long=force)
-            argparse $options -- $argv[2..]
+            argparse --name "tpr init" --min-args 1 --max-args 1 $options -- $argv[2..]
             or return 1
 
             if set --query _flag_help
@@ -301,7 +301,7 @@ function tpr --description 'Manage LaTeX project repositories' --argument comman
                 __tpr_FAIL "Dependencies `yq` and `gh` missing: command `tpr remote` not supported"; return 1
             end
 
-            argparse $options -- $argv[2..]
+            argparse --name "tpr remote" --min-args 1 --max-args 1 $options -- $argv[2..]
             or return 1
 
             if set --query _flag_help
@@ -325,15 +325,14 @@ function tpr --description 'Manage LaTeX project repositories' --argument comman
             gh repo create $REPONAME --remote origin --source $tpr_working_dir --disable-issues --disable-wiki --private --push $homepage_opt
 
 
-        case archive export
+        case archive
             set --local options $options (fish_opt --short=I --long=include --multiple-vals)
             set --local options $options (fish_opt --short=b --long=bare)
             set --local options $options (fish_opt --short=f --long=force)
             set --local options $options (fish_opt --short=F --long=format --required-val)
 
-            if not argparse $options -- $argv[2..]
-                return 1
-            end
+            argparse --name "tpr archive" --min-args 1 --max-args 2 $options -- $argv[2..]
+            or return 1
 
             if set --query _flag_help
                 tpr_help archive; return 0
@@ -419,7 +418,7 @@ function tpr --description 'Manage LaTeX project repositories' --argument comman
 
 
         case diff
-            argparse $options -- $argv[2..]
+            argparse --name "tpr diff" --min-args 2 --max-args 3 $options -- $argv[2..]
             or return 1
 
             if set --query _flag_help
@@ -452,7 +451,7 @@ function tpr --description 'Manage LaTeX project repositories' --argument comman
 
 
         case validate
-            argparse $options -- $argv[2..]
+            argparse --name "tpr validate" --max-args 1 $options -- $argv[2..]
             or return 1
 
             if set --query _flag_help
@@ -470,7 +469,7 @@ function tpr --description 'Manage LaTeX project repositories' --argument comman
         case compile
             set --local options $options (fish_opt --short=F --long=format --required-val)
             set --local options $options (fish_opt --short=f --long=force)
-            argparse $options -- $argv[2..]
+            argparse --name "tpr compile" --min-args 1 --max-args 2 $options -- $argv[2..]
             or return 1
 
             if set --query _flag_help
@@ -509,7 +508,7 @@ function tpr --description 'Manage LaTeX project repositories' --argument comman
 
 
         case update
-            argparse $options -- $argv[2..]
+            argparse --name "tpr update" --max-args 0 $options -- $argv[2..]
             or return 1
 
             if set --query _flag_help
