@@ -19,7 +19,7 @@ complete --command tpr --exclusive --condition "not __fish_seen_subcommand_from 
 # complete --command tpr --exclusive --condition "not __fish_seen_subcommand_from $tpr_subcommands" --arguments uninstall --description "Uninstall existing template"
 # complete --command tpr --exclusive --condition "not __fish_seen_subcommand_from $tpr_subcommands" --arguments update --description "Update installed templates"
 #
-complete --command tpr --exclusive --condition "__fish_seen_subcommand_from template and not __fish_seen_subcommand_from uninstall" --arguments $tpr_template_subcommands
+complete --command tpr --exclusive --condition "__fish_seen_subcommand_from template and not __fish_seen_subcommand_from uninstall" --arguments "$tpr_template_subcommands"
 complete --command tpr --exclusive --condition "__fish_seen_subcommand_from init" --arguments "(tpr template list)" 
 complete --command tpr --exclusive --condition "__fish_seen_subcommand_from template and __fish_seen_subcommand_from uninstall" --arguments "(tpr template list)" 
 complete --command tpr --force-files --condition "__fish_seen_subcommand_from compile archive diff"
