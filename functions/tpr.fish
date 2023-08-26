@@ -18,12 +18,10 @@ function __tpr_main_tex --argument tpr_working_dir
     set --local main_tex_extension (path extension $main_tex)
 
     if not test -f $main_tex_relative
-        return 1
+        or not test "$main_tex_extension" = ".tex"
+        __tpr_FAIL "no valid tex file specified with .latexmain"; return 1
     end
-    
-    if not test "$main_tex_extension" = ".tex"
-        return 1
-    end
+
     echo $main_tex
 end
 
@@ -38,7 +36,7 @@ function __tpr_compile_force --argument texfile
 end
 
 
-function __tpr_tar --argument source_dir tarfile
+function __tpr_tar --description "create an uncompressed tarfile from `source_dir`" --argument source_dir tarfile
     if test -f "$source_dir/.gitignore"
         set --function ignore_file --ignore-file $source_dir/.gitignore
     end
@@ -49,20 +47,17 @@ end
 function __tpr_populate_tempdir --description "archive the current directory to a temporary tarfile" --argument temp_dir tpr_working_dir commit
     # get and validate main.tex
     set --local main_tex (__tpr_main_tex $tpr_working_dir)
-    if not test -f "$tpr_working_dir/$main_tex"
-        __tpr_FAIL "no tex file specified with .latexmain"; return 1
-    end
+    or return 1
+
 
     if test -n "$commit" >/dev/null
         # use `git archive` to dump to $tarfile if commit specified
-        if not git -C $tpr_working_dir archive --format=tar $commit --output $temp_dir/source.tar
-            return 1
-        end
+        git -C $tpr_working_dir archive --format=tar $commit --output $temp_dir/source.tar
+        or return 1
     else
         # otherwise, populate $tarfile with current contents
-        if not __tpr_tar $tpr_working_dir $temp_dir/source.tar
-            return 1
-        end
+        __tpr_tar $tpr_working_dir $temp_dir/source.tar
+        or return 1
     end
 
     # untar
@@ -80,9 +75,8 @@ end
 
 
 function __tpr_list_templates --argument template_directory
-    if not path basename $template_directory/*
-        return 0
-    end
+    path basename $template_directory/*
+    or return 0
 end
 
 
@@ -91,9 +85,8 @@ function tpr --description 'Initialize LaTeX project repositories' --argument co
     set --local options $options (fish_opt --short=v --long=version)
     set --local options $options (fish_opt --short=C --long=directory --required-val)
 
-    if not argparse --stop-nonopt $options -- $argv
-        return 1
-    end
+    argparse --stop-nonopt $options -- $argv
+    or return 1
 
     set --function tpr_version 0.4
 
@@ -138,7 +131,7 @@ function tpr --description 'Initialize LaTeX project repositories' --argument co
     end
 
     set --local temp_dir (mktemp --directory)
-    trap "rm -rf $temp_dir" INT TERM HUP EXIT
+    and trap "rm -rf $temp_dir" INT TERM HUP EXIT
 
 
     set --local options (fish_opt --short=h --long=help)
@@ -150,9 +143,8 @@ function tpr --description 'Initialize LaTeX project repositories' --argument co
             end
 
             # parse options and catch help
-            if not argparse --stop-nonopt $options -- $argv[2..]
-                return 1
-            end
+            argparse --stop-nonopt $options -- $argv[2..]
+            or return 1
 
             if set --query _flag_help
                 tpr_help template; return 0
@@ -166,9 +158,8 @@ function tpr --description 'Initialize LaTeX project repositories' --argument co
             switch $argv[1]
                 case install
                     # parse options and catch help
-                    if not argparse $options -- $argv[2..]
-                        return 1
-                    end
+                    argparse $options -- $argv[2..]
+                    or return 1
 
                     if set --query _flag_help
                         tpr_help template-install; return 0
@@ -203,9 +194,8 @@ function tpr --description 'Initialize LaTeX project repositories' --argument co
 
                 case uninstall
                     # parse options and catch help
-                    if not argparse $options -- $argv[2..]
-                        return 1
-                    end
+                    argparse $options -- $argv[2..]
+                    or return 1
 
                     if set --query _flag_help
                         tpr_help template-uninstall; return 0
@@ -231,9 +221,8 @@ function tpr --description 'Initialize LaTeX project repositories' --argument co
 
                 case update
                     # parse options and catch help
-                    if not argparse $options -- $argv[2..]
-                        return 1
-                    end
+                    argparse $options -- $argv[2..]
+                    or return 1
 
                     if set --query _flag_help
                         tpr_help template-update; return 0
@@ -249,9 +238,8 @@ function tpr --description 'Initialize LaTeX project repositories' --argument co
 
                 case list ls
                     # parse options and catch help
-                    if not argparse $options -- $argv[2..]
-                        return 1
-                    end
+                    argparse $options -- $argv[2..]
+                    or return 1
 
                     if set --query _flag_help
                         tpr_help template-list; return 0
@@ -270,9 +258,8 @@ function tpr --description 'Initialize LaTeX project repositories' --argument co
                 __tpr_FAIL "Dependency `copier` missing: command `tpr init` not supported"; return 1
             end
             set --local options $options (fish_opt --short=F --long=force)
-            if not argparse $options -- $argv[2..]
-                return 1
-            end
+            argparse $options -- $argv[2..]
+            or return 1
 
             if set --query _flag_help
                 tpr_help init; return 0
@@ -314,9 +301,8 @@ function tpr --description 'Initialize LaTeX project repositories' --argument co
                 __tpr_FAIL "Dependencies `yq` and `gh` missing: command `tpr remote` not supported"; return 1
             end
 
-            if not argparse $options -- $argv[2..]
-                return 1
-            end
+            argparse $options -- $argv[2..]
+            or return 1
 
             if set --query _flag_help
                 tpr_help remote; return 0
@@ -381,6 +367,7 @@ function tpr --description 'Initialize LaTeX project repositories' --argument co
             set --local main_tex (__tpr_populate_tempdir $temp_dir $tpr_working_dir $COMMIT)
             or return 1
 
+
             # if --bare: replace tarfile with modified contents
             if set --query _flag_bare
                 if type -q arxiv_latex_cleaner
@@ -432,9 +419,8 @@ function tpr --description 'Initialize LaTeX project repositories' --argument co
 
 
         case diff
-            if not argparse $options -- $argv[2..]
-                return 1
-            end
+            argparse $options -- $argv[2..]
+            or return 1
 
             if set --query _flag_help
                 tpr_help diff; return 0
@@ -466,9 +452,8 @@ function tpr --description 'Initialize LaTeX project repositories' --argument co
 
 
         case validate
-            if not argparse $options -- $argv[2..]
-                return 1
-            end
+            argparse $options -- $argv[2..]
+            or return 1
 
             if set --query _flag_help
                 tpr_help validate; return 0
@@ -483,9 +468,8 @@ function tpr --description 'Initialize LaTeX project repositories' --argument co
 
 
         case compile
-            if not argparse $options -- $argv[2..]
-                return 1
-            end
+            argparse $options -- $argv[2..]
+            or return 1
 
             if set --query _flag_help
                 tpr_help compile; return 0
@@ -506,9 +490,8 @@ function tpr --description 'Initialize LaTeX project repositories' --argument co
 
 
         case update
-            if not argparse $options -- $argv[2..]
-                return 1
-            end
+            argparse $options -- $argv[2..]
+            or return 1
 
             if set --query _flag_help
                 tpr_help update; return 0
