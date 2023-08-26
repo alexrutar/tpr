@@ -93,7 +93,7 @@ function tpr --description 'Manage LaTeX project repositories' --argument comman
     argparse --stop-nonopt $options -- $argv
     or return 1
 
-    set --function tpr_version 1.0
+    set --function tpr_version 1.1
 
     # catch help and version flags
     if set --query _flag_help
