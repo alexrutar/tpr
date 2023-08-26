@@ -262,8 +262,6 @@ function tpr --description 'Manage LaTeX project repositories' --argument comman
             argparse --name "tpr init" --max-args 1 $options -- $argv[2..]
             or return 1
 
-            echo $argv
-
             if set --query _flag_help
                 tpr_help init; return 0
             end
