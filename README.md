@@ -21,14 +21,14 @@ In order to use `tpr`, you need a few dependencies.
 2. [git](https://git-scm.com/), for managing version control.
 3. [fd](https://github.com/sharkdp/fd), for basic file system management.
 
-If you want to use the `tpr template` and `tpr remote` commands, you need
+If you want to use the `tpr init` and `tpr template` commands, you need
 
 4. [copier](https://copier.readthedocs.io/en/stable/), for template management.
 
 If you want to use the `tpr remote` command, you need:
 
-5. [yq](https://github.com/mikefarah/yq), for reading configuration files.
-6. The [github cli](https://cli.github.com/), for managing remote repositories.
+5. The [github cli](https://cli.github.com/), for managing remote repositories.
+6. [yq](https://github.com/mikefarah/yq), for reading configuration files.
 
 If you want to use the `tpr archive --bare` command, you may want the following additional dependency.
 
@@ -47,10 +47,10 @@ tpr template install preprint https://github.com/rutar-academic/template-preprin
 This installs the template located at the URL `https://github.com/rutar-academic/template-preprint` under the name `preprint`.
 You can install templates from any valid git URL or a local git repository.
 
-List available templates with `tpr template list`
+List available templates with `tpr template list`.
 Templates are installed in the directory `$XDG_DATA_HOME/tpr/templates`.
 
-Now, create a new directory, change to it, and initialize
+Now, create a new directory, change to it, and initialize:
 ```fish
 mkdir my-project
 cd my-project
@@ -64,7 +64,7 @@ To build a PDF file from the project, run
 tpr compile out.pdf
 ```
 This generates a file `out.pdf` in the current directory by compiling the file `<main>.tex` specified by `<main>.tex.latexmain`.
-The compilation can take a while since it is compiled from scratch.
+The compilation may take a while since it ignores any intermediate files already in the folder.
 
 To export the project, run
 ```fish
