@@ -325,7 +325,6 @@ function tpr --description 'Manage LaTeX project repositories' --argument comman
             gh repo create $REPONAME --remote origin --source $tpr_working_dir --disable-issues --disable-wiki --private --push $homepage_opt
 
 
-        # add --include / -I option to tpr archive with a regex
         case archive export
             set --local options $options (fish_opt --short=I --long=include --multiple-vals)
             set --local options $options (fish_opt --short=b --long=bare)
@@ -469,6 +468,8 @@ function tpr --description 'Manage LaTeX project repositories' --argument comman
 
 
         case compile
+            set --local options $options (fish_opt --short=F --long=format --required-val)
+            set --local options $options (fish_opt --short=f --long=force)
             argparse $options -- $argv[2..]
             or return 1
 
@@ -476,9 +477,15 @@ function tpr --description 'Manage LaTeX project repositories' --argument comman
                 tpr_help compile; return 0
             end
 
-            set --local PDF $argv[1]
-            if not set --query PDF
-                __tpr_FAIL "missing positional argument PDF"; return 1
+            if set --query _flag_format
+                set --function FORMAT $_flag_format
+            else
+                set --function FORMAT pdf
+            end
+
+            set --local OUT $argv[1]
+            if not set --query OUT
+                __tpr_FAIL "missing positional argument OUT"; return 1
             end
 
             set --local COMMIT $argv[2]
@@ -486,8 +493,19 @@ function tpr --description 'Manage LaTeX project repositories' --argument comman
             set --local main_tex (__tpr_populate_tempdir $temp_dir $tpr_working_dir $COMMIT)
             or return 1
 
-            __tpr_compile "$temp_dir/source/$main_tex"
-            and mv -i (path change-extension pdf $temp_dir/source/$main_tex) $PDF
+            if not __tpr_compile "$temp_dir/source/$main_tex"
+                __tpr_FAIL "Failed to compile project."; return 1
+            end
+
+            if set --query _flag_force
+                set --function mv_flags --force
+            else
+                set --function mv_flags --interactive
+            end
+
+            if not mv $mv_flags (path change-extension $FORMAT $temp_dir/source/$main_tex) $OUT 2> /dev/null
+                __tpr_FAIL "Failed to obtain file '$(path change-extension $FORMAT $main_tex)' after compilation."; return 1
+            end
 
 
         case update
