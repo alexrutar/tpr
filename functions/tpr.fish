@@ -1,7 +1,12 @@
-function __tpr_FAIL --argument message
+function __tpr_FAIL --argument messane
     set_color red; echo -n "Error: " >&2; set_color normal
     echo $message >&2
     return 1
+end
+
+
+function __tpr_missing_arg --argument arg_name
+    __tpr_FAIL "Missing positional argument $arg_name."; return 1
 end
 
 
@@ -158,23 +163,20 @@ function tpr --description 'Manage LaTeX project repositories' --argument comman
             switch $argv[1]
                 case install
                     # parse options and catch help
-                    argparse --name "tpr template install" --min-args 1 --max-args 1 $options -- $argv[2..]
+                    argparse --name "tpr template install" --max-args 2 $options -- $argv[2..]
                     or return 1
 
                     if set --query _flag_help
                         tpr_help template-install; return 0
                     end
 
-                    # first positional
                     set --local NAME $argv[1]
                     if not set --query NAME
-                        __tpr_FAIL "missing positional argument NAME"; return 1
+                        __tpr_missing_arg NAME; return 1
                     end
-
-                    # second positional
                     set --local GIT $argv[2]
                     if not set --query GIT
-                        __tpr_FAIL "missing positional argument GIT"; return 1
+                        __tpr_missing_arg GIT; return 1
                     end
 
                     # validate template name
@@ -194,17 +196,16 @@ function tpr --description 'Manage LaTeX project repositories' --argument comman
 
                 case uninstall
                     # parse options and catch help
-                    argparse --name "tpr template uninstall" --min-args 1 --max-args 1 $options -- $argv[2..]
+                    argparse --name "tpr template uninstall" --max-args 1 $options -- $argv[2..]
                     or return 1
 
                     if set --query _flag_help
                         tpr_help template-uninstall; return 0
                     end
 
-                    # first positional
                     set --local NAME $argv[1]
                     if not set --query NAME
-                        __tpr_FAIL "missing positional argument NAME"; return 1
+                        __tpr_missing_arg NAME; return 1
                     end
 
                     # validate template name
@@ -258,8 +259,10 @@ function tpr --description 'Manage LaTeX project repositories' --argument comman
                 __tpr_FAIL "Dependency `copier` missing: command `tpr init` not supported"; return 1
             end
             set --local options $options (fish_opt --short=F --long=force)
-            argparse --name "tpr init" --min-args 1 --max-args 1 $options -- $argv[2..]
+            argparse --name "tpr init" --max-args 1 $options -- $argv[2..]
             or return 1
+
+            echo $argv
 
             if set --query _flag_help
                 tpr_help init; return 0
@@ -272,7 +275,7 @@ function tpr --description 'Manage LaTeX project repositories' --argument comman
 
             set --local TEMPLATE $argv[1]
             if not set --query TEMPLATE
-                __tpr_FAIL "missing positional argument TEMPLATE"; return 1
+                __tpr_missing_arg TEMPLATE; return 1
             end
 
             set --function available_templates (__tpr_list_templates $tpr_template_dir)
@@ -301,7 +304,7 @@ function tpr --description 'Manage LaTeX project repositories' --argument comman
                 __tpr_FAIL "Dependencies `yq` and `gh` missing: command `tpr remote` not supported"; return 1
             end
 
-            argparse --name "tpr remote" --min-args 1 --max-args 1 $options -- $argv[2..]
+            argparse --name "tpr remote" --max-args 1 $options -- $argv[2..]
             or return 1
 
             if set --query _flag_help
@@ -309,9 +312,10 @@ function tpr --description 'Manage LaTeX project repositories' --argument comman
             end
 
             set --local REPONAME $argv[1]
-            if not test --query REPONAME
-                __tpr_FAIL "missing positional argument REPONAME"; return 1
+            if not set --query REPONAME
+                __tpr_missing_arg REPONAME; return 1
             end
+
 
             if git -C $tpr_working_dir config --get remote.origin.url
                 __tpr_FAIL "remote 'origin' already exists"; return 1
@@ -328,10 +332,11 @@ function tpr --description 'Manage LaTeX project repositories' --argument comman
         case archive
             set --local options $options (fish_opt --short=I --long=include --multiple-vals)
             set --local options $options (fish_opt --short=b --long=bare)
+            set --local options $options (fish_opt --short=r --long=reference --required-val)
             set --local options $options (fish_opt --short=f --long=force)
             set --local options $options (fish_opt --short=F --long=format --required-val)
 
-            argparse --name "tpr archive" --min-args 1 --max-args 2 $options -- $argv[2..]
+            argparse --name "tpr archive" --max-args 1 $options -- $argv[2..]
             or return 1
 
             if set --query _flag_help
@@ -350,7 +355,7 @@ function tpr --description 'Manage LaTeX project repositories' --argument comman
 
             set --function OUT $argv[1]
             if not set --query OUT
-                __tpr_FAIL "missing positional argument OUT"; return 1
+                __tpr_missing_arg OUT; return 1
             end
 
             # if force, delete OUT
@@ -360,9 +365,7 @@ function tpr --description 'Manage LaTeX project repositories' --argument comman
                 rm --recursive --force $OUT
             end
 
-            set --function COMMIT $argv[2]
-
-            set --local main_tex (__tpr_populate_tempdir $temp_dir $tpr_working_dir $COMMIT)
+            set --local main_tex (__tpr_populate_tempdir $temp_dir $tpr_working_dir $_flag_reference)
             or return 1
 
 
@@ -418,7 +421,7 @@ function tpr --description 'Manage LaTeX project repositories' --argument comman
 
 
         case diff
-            argparse --name "tpr diff" --min-args 2 --max-args 3 $options -- $argv[2..]
+            argparse --name "tpr diff" --max-args 3 $options -- $argv[2..]
             or return 1
 
             if set --query _flag_help
@@ -427,15 +430,13 @@ function tpr --description 'Manage LaTeX project repositories' --argument comman
 
             set --function PDF $argv[1]
             if not set --query PDF
-                __tpr_FAIL "missing positional argument PDF"; return 1
+                __tpr_missing_arg PDF; return 1
             end
-
             set --function COMMIT $argv[2]
             if not set --query COMMIT
-                __tpr_FAIL "missing positional argument COMMIT"; return 1
+                __tpr_missing_arg COMMIT; return 1
             end
-
-            set --function REV $argv[2]
+            set --function REV $argv[3]
 
             set --local main_tex (__tpr_populate_tempdir $temp_dir $tpr_working_dir $REV)
             or return 1
@@ -451,16 +452,15 @@ function tpr --description 'Manage LaTeX project repositories' --argument comman
 
 
         case validate
-            argparse --name "tpr validate" --max-args 1 $options -- $argv[2..]
+            set --local options $options (fish_opt --short=r --long=reference --required-val)
+            argparse --name "tpr validate" --max-args 0 $options -- $argv[2..]
             or return 1
 
             if set --query _flag_help
                 tpr_help validate; return 0
             end
 
-            set --local COMMIT $argv[1]
-
-            set --local main_tex (__tpr_populate_tempdir $temp_dir $tpr_working_dir $COMMIT)
+            set --local main_tex (__tpr_populate_tempdir $temp_dir $tpr_working_dir $_flag_reference)
             or return 1
 
             __tpr_compile "$temp_dir/source/$main_tex"
@@ -469,12 +469,13 @@ function tpr --description 'Manage LaTeX project repositories' --argument comman
         case compile
             set --local options $options (fish_opt --short=F --long=format --required-val)
             set --local options $options (fish_opt --short=f --long=force)
-            argparse --name "tpr compile" --min-args 1 --max-args 2 $options -- $argv[2..]
+            set --local options $options (fish_opt --short=r --long=reference --required-val)
+            argparse --name "tpr compile" --max-args 1 $options -- $argv[2..]
             or return 1
-
             if set --query _flag_help
                 tpr_help compile; return 0
             end
+                
 
             if set --query _flag_format
                 set --function FORMAT $_flag_format
@@ -484,12 +485,10 @@ function tpr --description 'Manage LaTeX project repositories' --argument comman
 
             set --local OUT $argv[1]
             if not set --query OUT
-                __tpr_FAIL "missing positional argument OUT"; return 1
+                __tpr_missing_arg OUT; return 1
             end
 
-            set --local COMMIT $argv[2]
-
-            set --local main_tex (__tpr_populate_tempdir $temp_dir $tpr_working_dir $COMMIT)
+            set --local main_tex (__tpr_populate_tempdir $temp_dir $tpr_working_dir $_flag_reference)
             or return 1
 
             if not __tpr_compile "$temp_dir/source/$main_tex"

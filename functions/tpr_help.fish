@@ -45,18 +45,15 @@ function tpr_help --argument cmd
     switch $cmd
         case ''
             __tpr_echo_header usage
-            echo '  tpr init TEMPLATE          Create new project from TEMPLATE'
-            echo '  tpr template ...           Subcommands for managing templates'
-            echo '  tpr compile OUT [COMMIT]   Compile and output to OUT'
-            echo '                               COMMIT: use commit'
-            echo '  tpr validate [COMMIT]      Verify compilation'
-            echo '                               COMMIT: use commit'
-            echo '  tpr archive OUT [COMMIT]   Export files to OUT'
-            echo '                               COMMIT: use commit'
-            echo '  tpr remote REPONAME        Create a remote repository'
-            echo '  tpr update                 Update existing project'
-            echo '  tpr diff PDF COMMIT [REV]  Create diff PDF'
-            echo '                               REV: diff against commit'
+            echo '  tpr init TEMPLATE        Create new project from TEMPLATE'
+            echo '  tpr template ...         Subcommands for managing templates'
+            echo '  tpr compile OUT          Compile and output to OUT'
+            echo '  tpr validate             Verify compilation'
+            echo '  tpr archive OUT          Export files to OUT'
+            echo '  tpr remote REPONAME      Create a remote repository'
+            echo '  tpr update               Update existing project'
+            echo '  tpr diff PDF OLD [NEW]   Create diff PDF'
+            echo '                             NEW: diff against commit'
             __tpr_echo_header options
             echo '  -C/--directory           Specify working directory (default: .)'
             echo '  -h/--help                Print help and exit.'
@@ -84,10 +81,11 @@ function tpr_help --argument cmd
             echo '  Update the project in the working directory.'
 
         case compile
-            __tpr_echo_usage 'tpr compile OUT [COMMIT]'
+            __tpr_echo_usage 'tpr compile OUT'
             __tpr_echo_header options
             echo '  -f/--force               Overwrite OUT.'
             echo '  -F/--format FMT          Format of the output file (default: pdf).'
+            echo '  -r/--reference REF       Use git reference REF.'
             __tpr_echo_header description
             echo '  Compile tex file specified with .latexmain in the current directory'
             echo '  and check for errors. Output the compiled file to OUT using command'
@@ -98,39 +96,41 @@ function tpr_help --argument cmd
             echo
             echo '  If --force is given overwrite file OUT.'
             echo
-            echo '  If COMMIT is given, use the commit specified by COMMIT.'
-            echo -n '  The COMMIT argument is used as the argument to '; __tpr_echo_code 'git archive'; echo '.'
+            echo '  If REF is given, use the commit specified by REF'
+            echo -n '  The REF argument is used as the argument to '; __tpr_echo_code 'git archive'; echo '.'
 
         case diff
-            __tpr_echo_usage 'tpr diff PDF COMMIT [REV]'
+            __tpr_echo_usage 'tpr diff PDF OLD [NEW]'
             __tpr_echo_header options
             echo '  -h/--help                Print help and exit.'
             __tpr_echo_header description
-            echo '  Create a diff PDF showing changes between COMMIT and HEAD.'
-            echo '  If REV is given, instead show changes between COMMIT and'
-            echo '  REV.'
+            echo '  Create a diff PDF showing changes between OLD and HEAD.'
+            echo '  If NEW is given, instead show changes between OLD and'
+            echo '  NEW'
 
         case validate
-            __tpr_echo_usage 'tpr validate [COMMIT]'
+            __tpr_echo_usage 'tpr validate'
             __tpr_echo_header options
             echo '  -h/--help                Print help and exit.'
+            echo '  -r/--reference REF       Use git reference REF.'
             __tpr_echo_header description
             echo '  Compile tex file specified with .latexmain in the current'
             echo '  directory and check for errors. The command used is'
             echo
             echo -n '  > '; set_color brgreen; echo -n 'latexmk -pdf -interaction=nonstopmode -silent -Werror'; set_color normal; echo
             echo
-            echo '  If COMMIT is given, use the commit specified by COMMIT.'
-            echo -n '  The COMMIT argument is used as the argument to '; __tpr_echo_code 'git archive'; echo '.'
+            echo '  If REF is given, use the commit specified by REF.'
+            echo -n '  The REF argument is used as the argument to '; __tpr_echo_code 'git archive'; echo '.'
 
         case archive
-            __tpr_echo_usage 'tpr archive OUT [COMMIT]'
+            __tpr_echo_usage 'tpr archive OUT'
             __tpr_echo_header options
             echo '  -b/--bare                 Clean export files.'
             echo '  -h/--help                 Print help and exit.'
-            echo '  -I/--include EXTENSION    Include additional files in archive.'
+            echo '  -I/--include=EXTENSION    Include additional files in archive.'
             echo '  -f/--force                Overwrite OUT.'
             echo '  -F/--format [tar|gz|dir]  Format of the archive (default: gz).'
+            echo '  -r/--reference REF       Use git reference REF.'
             __tpr_echo_header description
             echo '  Export files in the current repository to the file OUT.'
             echo '  The export respects your .gitignore. Include additional files'
@@ -146,8 +146,8 @@ function tpr_help --argument cmd
             echo
             echo '  If the --force option is used, delete OUT before archiving.'
             echo
-            echo '  If COMMIT is given, use the commit specified by COMMIT.'
-            echo -n '  The COMMIT argument is used as the argument to '; __tpr_echo_code 'git archive'; echo '.'
+            echo '  If REF is given, use the commit specified by REF.'
+            echo -n '  The REF argument is used as the argument to '; __tpr_echo_code 'git archive'; echo '.'
 
         case remote
             __tpr_echo_usage 'tpr remote REPONAME'
@@ -163,7 +163,7 @@ function tpr_help --argument cmd
             echo '  which is often `~/.config/tpr/config.toml`. The following keys'
             echo '  are supported:'
             echo
-            echo '`homepage`: default homepage for your reporitory'
+            echo '  homepage: default homepage for your reporitory'
 
         case template
             __tpr_echo_header subcommands

@@ -1,3 +1,19 @@
+# BEGIN content from https://github.com/fish-shell/fish-shell/blob/master/share/completions/git.fish
+function __tpr_git_branches
+    git for-each-ref --format='%(refname:strip=2)%09Local Branch' --sort=-committerdate refs/heads/ 2>/dev/null
+    git for-each-ref --format='%(refname:strip=2)%09Remote Branch' refs/remotes/ 2>/dev/null
+end
+
+function __tpr_git_tags
+    git tag --sort=-creatordate 2>/dev/null
+end
+
+function __tpr_git_commits
+    git log --pretty=tformat:"%H"\t"%<(64,trunc)%s" --all --max-count=1000 2>/dev/null \
+        | string replace -r '^([0-9a-f]{10})[0-9a-f]*\t(.*)' '$1\t$2'
+end
+# END
+
 set -l tpr_subcommands init diff remote archive validate compile list template update
 set -l tpr_template_subcommands install uninstall update
 
@@ -21,9 +37,14 @@ complete -c tpr -n "not __fish_seen_subcommand_from $tpr_subcommands" -a validat
 # tpr {archive, compile, diff}
 complete -c tpr -n "__fish_seen_subcommand_from archive compile diff" -F
 complete -c tpr -n "__fish_seen_subcommand_from archive" -s b -l bare -d "Clean export files"
-complete -c tpr -n "__fish_seen_subcommand_from archive" -s I -l include -r -d "Include additional files"
+complete -c tpr -n "__fish_seen_subcommand_from archive" -rf -s I -l include -d "Include additional files"
 complete -c tpr -n "__fish_seen_subcommand_from archive compile" -s f -l force -d "Overwrite output"
-complete -c tpr -n "__fish_seen_subcommand_from archive compile" -s F -l format -a "tar gz dir" -d "Specify output format"
+complete -c tpr -n "__fish_seen_subcommand_from archive compile" -rf -s F -l format -a "tar gz dir" -d "Specify output format"
+
+# tpr {archive, compile, validate}
+complete -c tpr -n "__fish_seen_subcommand_from archive compile validate" -rf -s r -l reference -d "Use git ref" -ka '(__tpr_git_branches)'
+complete -c tpr -n "__fish_seen_subcommand_from archive compile validate" -rf -s r -l reference -d "Use git ref" -ka '(__tpr_git_tags)'
+complete -c tpr -n "__fish_seen_subcommand_from archive compile validate" -rf -s r -l reference -d "Use git ref" -ka '(__tpr_git_commits)'
 
 # tpr init
 complete -c tpr -n "__fish_seen_subcommand_from init" -a "(tpr template list)"
