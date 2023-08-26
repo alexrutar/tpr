@@ -43,8 +43,8 @@ end
 function __tpr_uninstall --on-event tpr_uninstall
     # functions/tpr.fish
     functions --erase \
-        tpr __tpr_FAIL __tpr_WARN __tpr_main_tex __tpr_compile \
-        __tpr_compile_force __tpr_tar __tpr_populate_tempdir \
+        tpr __tpr_FAIL __tpr_WARN __tpr_missing_arg __tpr_main_tex \
+        __tpr_compile  __tpr_compile_force __tpr_tar __tpr_populate_tempdir \
         __tpr_list_templates
 
     # functions/tpr_help.fish
