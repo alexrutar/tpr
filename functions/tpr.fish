@@ -82,7 +82,7 @@ end
 
 function tpr --description 'Manage LaTeX project repositories' --argument command
     set --local options (fish_opt --short=h --long=help)
-    set --local options $options (fish_opt --long=version)
+    set --local options $options (fish_opt --short=V --long=version)
     set --local options $options (fish_opt --short=C --long=directory --required-val)
 
     argparse --stop-nonopt $options -- $argv

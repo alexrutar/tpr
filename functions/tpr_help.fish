@@ -15,21 +15,36 @@ function __tpr_echo_url
 end
 
 
-function __tpr_echo_usage
+function __tpr_echo_header --argument header
     set_color cyan --bold
-    echo -n 'Usage: '
+    switch $header
+        case usage-nl
+            echo -n 'Usage: '
+        case usage
+            echo 'Usage:'
+        case description
+            echo; echo 'Description:'
+        case options
+            echo; echo 'Options:'
+        case config
+            echo; echo 'Configuration:'
+        case subcommands
+            echo 'Subcommands:'
+    end
     set_color normal
+end
+
+
+function __tpr_echo_usage
+    __tpr_echo_header usage-nl
     echo "$argv"
-    echo
 end
 
 
 function tpr_help --argument cmd
     switch $cmd
         case ''
-            set_color cyan --bold
-            echo 'Usage:'
-            set_color normal
+            __tpr_echo_header usage
             echo '  tpr init TEMPLATE          Create new project from TEMPLATE'
             echo '  tpr template ...           Subcommands for managing templates'
             echo '  tpr compile PDF [COMMIT]   Compile and output to PDF'
@@ -41,10 +56,7 @@ function tpr_help --argument cmd
             echo '  tpr remote REPONAME        Create a remote repository'
             echo '  tpr update                 Update existing project'
             echo '  tpr diff PDF COMMIT [REV]  Create diff PDF'
-            echo
-            set_color cyan --bold
-            echo 'Options:'
-            set_color normal
+            __tpr_echo_header options
             echo '  -h/--help                Print help and exit.'
             echo '  -V/--version                Print version and exit.'
             echo '  -C/--directory           Specify working directory (default: .)'
@@ -56,6 +68,9 @@ function tpr_help --argument cmd
 
         case init
             __tpr_echo_usage 'tpr init TEMPLATE'
+            __tpr_echo_header options
+            echo '  -h/--help                Print help and exit.'
+            __tpr_echo_header description
             echo '  Create a new project in the working directory from TEMPLATE.'
             echo '  For information about template specification and installation,'
             echo -n '  run '
@@ -64,14 +79,17 @@ function tpr_help --argument cmd
 
         case update
             __tpr_echo_usage 'tpr update'
+            __tpr_echo_header options
+            echo '  -h/--help                Print help and exit.'
+            __tpr_echo_header description
             echo '  Update the project in the working directory.'
 
         case compile
             __tpr_echo_usage 'tpr compile PDF [COMMIT]'
-            set_color cyan --bold; echo 'Options:'; set_color normal
+            __tpr_echo_header options
             echo '  -f/--force               Overwrite OUT.'
             echo '  -F/--format FMT          Format of the output file (default: pdf).'
-            echo
+            __tpr_echo_header description
             echo '  Compile tex file specified with .latexmain in the current directory'
             echo '  and check for errors. Output the compiled file to OUT using command'
             echo
@@ -86,28 +104,35 @@ function tpr_help --argument cmd
 
         case diff
             __tpr_echo_usage 'tpr diff PDF COMMIT [REV]'
+            __tpr_echo_header options
+            echo '  -h/--help                Print help and exit.'
+            __tpr_echo_header description
             echo '  Create a diff PDF showing changes between COMMIT and HEAD.'
             echo '  If REV is given, instead show changes between COMMIT and'
             echo '  REV.'
 
         case validate
             __tpr_echo_usage 'tpr validate [COMMIT]'
+            __tpr_echo_header options
+            echo '  -h/--help                Print help and exit.'
+            __tpr_echo_header description
             echo '  Compile tex file specified with .latexmain in the current'
             echo '  directory and check for errors. The command used is'
             echo
-            echo '  > latexmk -pdf -interaction=nonstopmode -silent -Werror'
+            echo -n '  > '; set_color brgreen; echo -n 'latexmk -pdf -interaction=nonstopmode -silent -Werror'; set_color normal; echo
             echo
             echo '  If COMMIT is given, use the commit specified by COMMIT.'
             echo -n '  The COMMIT argument is used as the argument to '; __tpr_echo_code 'git archive'; echo '.'
 
         case archive
             __tpr_echo_usage 'tpr archive OUT [COMMIT]'
-            set_color cyan --bold; echo 'Options:'; set_color normal
+            __tpr_echo_header options
             echo '  -b/--bare                 Clean export files.'
+            echo '  -h/--help                 Print help and exit.'
             echo '  -I/--include EXTENSION    Include additional files in archive.'
             echo '  -f/--force                Overwrite OUT.'
             echo '  -F/--format [tar|gz|dir]  Format of the archive (default: gz).'
-            echo
+            __tpr_echo_header description
             echo '  Export files in the current repository to the file OUT.'
             echo '  The export respects your .gitignore. Include additional files'
             echo '  with -I. Clean export files with --bare, which automatically'
@@ -127,15 +152,14 @@ function tpr_help --argument cmd
 
         case remote
             __tpr_echo_usage 'tpr remote REPONAME'
+            __tpr_echo_header options
+            echo '  -h/--help                Print help and exit.'
+            __tpr_echo_header description
             echo '  Create a new private remote GitHub repository with name'
             echo '  REPONAME. REPONAME is an identifier of the form username/repo.'
-            echo
-            echo 'Example usage:'
-            echo
             echo '  Create a new private repository at alexrutar/test-repo.'
             echo '  > tpr remote alexrutar/test-repo'
-            echo
-            echo 'Configuration:'
+            __tpr_echo_header config
             echo '  tpr reads configuration from `$XDG_CONFIG_HOME/tpr/config.toml`,'
             echo '  which is often `~/.config/tpr/config.toml`. The following keys'
             echo '  are supported:'
@@ -144,12 +168,12 @@ function tpr_help --argument cmd
 
 
         case template
-            set_color cyan --bold
-            echo 'Subcommands:'
-            set_color normal
+            __tpr_echo_header subcommands
             echo '  install NAME GIT    Install new template'
             echo '  uninstall NAME      Uninstall template'
             echo '  update              Update existing templates'
+            __tpr_echo_header options
+            echo '  -h/--help                Print help and exit.'
             echo
             echo -n 'Run '; __tpr_echo_code 'tpr template [subcommand] --help'; echo ' for more information, or visit'
             echo -n '  '
@@ -159,6 +183,9 @@ function tpr_help --argument cmd
 
         case template-install
             __tpr_echo_usage 'tpr template install NAME GIT'
+            __tpr_echo_header options
+            echo '  -h/--help                Print help and exit.'
+            __tpr_echo_header description
             echo '  Install new templates with name NAME from the git repository GIT.'
             echo '  This is an error if the template already exists: to update, run'
             echo '  `tpr update`, and to remote a template, run `tpr remove-template`.'
@@ -172,16 +199,25 @@ function tpr_help --argument cmd
 
         case template-uninstall
             __tpr_echo_usage 'tpr uninstall NAME'
+            __tpr_echo_header options
+            echo '  -h/--help                Print help and exit.'
+            __tpr_echo_header description
             echo '  Uninstall the templates with name NAME.'
 
 
         case template-update
             __tpr_echo_usage 'tpr template update'
+            __tpr_echo_header options
+            echo '  -h/--help                Print help and exit.'
+            __tpr_echo_header description
             echo '  Apply upstream template changes to the current project.'
 
 
         case template-list
             __tpr_echo_usage 'tpr template list'
+            __tpr_echo_header options
+            echo '  -h/--help                Print help and exit.'
+            __tpr_echo_header description
             echo '  List all available templates. Install or update templates'
             echo -n '  with '
             __tpr_echo_code 'tpr install'
