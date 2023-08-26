@@ -46,7 +46,7 @@ function tpr_help --argument cmd
             echo 'Options:'
             set_color normal
             echo '  -h/--help                Print help and exit.'
-            echo '  --version                Print version and exit.'
+            echo '  -V/--version                Print version and exit.'
             echo '  -C/--directory           Specify working directory (default: .)'
             echo
             echo -n 'Run '; __tpr_echo_code 'tpr [subcommand] --help'; echo ' for more information, or visit'
