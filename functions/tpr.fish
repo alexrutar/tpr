@@ -39,7 +39,10 @@ end
 
 
 function __tpr_tar --argument source_dir tarfile
-    fd -H --exclude '.git' --base-directory $source_dir --print0 | xargs -0 tar -rf $tarfile -C $source_dir
+    if test -f "$source_dir/.gitignore"
+        set --function ignore_file --ignore-file $source_dir/.gitignore
+    end
+    fd -H --exclude '.git' $ignore_file --base-directory $source_dir --print0 | xargs -0 tar -rf $tarfile -C $source_dir
 end
 
 
@@ -335,11 +338,6 @@ function tpr --description 'Initialize LaTeX project repositories' --argument co
 
             if set --query _flag_help
                 tpr_help archive; return 0
-            end
-
-            # check for all arguments and parse to variables
-            if not test (count $argv) -gt 0
-                __tpr_FAIL "missing argument 'GZ'"; return 1
             end
 
             set --function GZ $argv[1]
