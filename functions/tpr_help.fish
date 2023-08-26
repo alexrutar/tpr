@@ -180,8 +180,8 @@ function tpr_help --argument cmd
             echo '  -h/--help                Print help and exit.'
             __tpr_echo_header description
             echo '  Install new templates with name NAME from the git repository GIT.'
-            echo '  This is an error if the template already exists: to update, run'
-            echo '  `tpr update`, and to remote a template, run `tpr remove-template`.'
+            echo '  This is an error if the template already exists (remove first.'
+            echo -n '  with '; __tpr_echo_code "tpr remplate remove"; echo '.'
             echo
             echo '  Templates for the project are rendered using copier. See'
             echo
@@ -208,7 +208,7 @@ function tpr_help --argument cmd
             __tpr_echo_header options
             echo '  -h/--help                Print help and exit.'
             __tpr_echo_header description
-            echo '  List all available templates. Install or update templates'
+            echo '  List all available templates. Install new templates'
             echo -n '  with '; __tpr_echo_code 'tpr install'; echo '.'
     end
 end
