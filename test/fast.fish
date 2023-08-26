@@ -35,13 +35,16 @@ __tpr_test init preprint
 # __tpr_test archive out.tar.gz
 # __tpr_test archive out --format dir
 # __tpr_test archive out --format dir
-touch out-bare
-touch main.bib
-rm -f .gitignore
-__tpr_test archive out-bare --format dir --bare --force
-ls -A out-bare
 # __tpr_test compile out.pdf
-# ls
+# __tpr_test compile out.bbl --format bbl
+__tpr_test compile out.fake --format fake
+# touch out-bare
+# touch main.bib
+# rm -f .gitignore
+# __tpr_test archive out-bare --format dir --bare --force
+# ls -A out-bare
+# __tpr_test compile out.pdf
+ls
 # __tpr_test diff diff.pdf @~1
 
 # CLEANUP

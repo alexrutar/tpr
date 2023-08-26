@@ -64,10 +64,18 @@ function tpr_help --argument cmd
 
         case compile
             __tpr_echo_usage 'tpr compile PDF [COMMIT]'
+            set_color cyan --bold; echo 'Options:'; set_color normal
+            echo '  -f/--force               Overwrite OUT.'
+            echo '  -F/--format FMT          Format of the output file (default: pdf).'
+            echo
             echo '  Compile tex file specified with .latexmain in the current directory'
-            echo '  and check for errors. Output the compiled file to PDF.'
+            echo '  and check for errors. Output the compiled file to OUT using command'
             echo
             echo -n '  > '; set_color brgreen; echo -n 'latexmk -pdf -interaction=nonstopmode -silent -Werror'; set_color normal; echo
+            echo
+            echo '  If FMT is given, output the file <main_tex>.$FMT.'
+            echo
+            echo '  If --force is given overwrite file OUT.'
             echo
             echo '  If COMMIT is given, use the commit specified by COMMIT.'
             echo -n '  The COMMIT argument is used as the argument to '; __tpr_echo_code 'git archive'; echo '.'
