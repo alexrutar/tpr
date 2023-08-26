@@ -18,18 +18,21 @@ Otherwise, the function is in [functions/tpr.fish](functions/tpr.fish) and the c
 In order to use `tpr`, you need a few dependencies.
 
 1. A working LaTeX distribution which supports `latexmk` (such as [TeX Live](https://tug.org/texlive/)).
-2. [copier](https://copier.readthedocs.io/en/stable/), for template management.
-3. [git](https://git-scm.com/), for managing version control.
-4. [fd](https://github.com/sharkdp/fd), for basic file system management.
+2. [git](https://git-scm.com/), for managing version control.
+3. [fd](https://github.com/sharkdp/fd), for basic file system management.
 
-If you want to use the `tpr remote` command, you need the following additional dependencies.
+If you want to use the `tpr template` and `tpr remote` commands, you need
+
+4. [copier](https://copier.readthedocs.io/en/stable/), for template management.
+
+If you want to use the `tpr remote` command, you need:
 
 5. [yq](https://github.com/mikefarah/yq), for reading configuration files.
 6. The [github cli](https://cli.github.com/), for managing remote repositories.
 
-If you want to use the `tpr archive --bare` command, you need the following additional dependency.
+If you want to use the `tpr archive --bare` command, you may want the following additional dependency.
 
-7. [arxiv_latex_cleaner](https://github.com/google-research/arxiv-latex-cleaner), for cleaning the export folder.
+7. [arxiv_latex_cleaner](https://github.com/google-research/arxiv-latex-cleaner), for removal of comments and additional cleaning of export folder.
 
 Visit the linked pages for precise installation instructions.
 
@@ -60,7 +63,7 @@ To build a PDF file from the project, run
 ```fish
 tpr compile out.pdf
 ```
-This generates a file `out.pdf` in the current directory.
+This generates a file `out.pdf` in the current directory by compiling the file `<main>.tex` specified by `<main>.tex.latexmain`.
 The compilation can take a while since it is compiled from scratch.
 
 To export the project, run
