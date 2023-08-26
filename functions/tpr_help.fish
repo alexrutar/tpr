@@ -45,9 +45,9 @@ function tpr_help --argument cmd
             set_color cyan --bold
             echo 'Options:'
             set_color normal
-            echo '  -h/--help                 Print help and exit.'
-            echo '  -v/-version               Print version and exit.'
-            echo '  -C/--directory            Specify working directory (default: .)'
+            echo '  -h/--help                Print help and exit.'
+            echo '  --version                Print version and exit.'
+            echo '  -C/--directory           Specify working directory (default: .)'
             echo
             echo -n 'Run '; __tpr_echo_code 'tpr [subcommand] --help'; echo ' for more information, or visit'
             echo -n '  '
@@ -56,11 +56,15 @@ function tpr_help --argument cmd
 
         case init
             __tpr_echo_usage 'tpr init TEMPLATE'
-            echo '  Create a new project in the current directory from TEMPLATE.'
+            echo '  Create a new project in the working directory from TEMPLATE.'
             echo '  For information about template specification and installation,'
             echo -n '  run '
             __tpr_echo_code 'tpr install --help'
             echo '.'
+
+        case update
+            __tpr_echo_usage 'tpr update'
+            echo '  Update the project in the working directory.'
 
         case compile
             __tpr_echo_usage 'tpr compile PDF [COMMIT]'
