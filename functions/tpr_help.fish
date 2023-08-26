@@ -47,7 +47,7 @@ function tpr_help --argument cmd
             __tpr_echo_header usage
             echo '  tpr init TEMPLATE          Create new project from TEMPLATE'
             echo '  tpr template ...           Subcommands for managing templates'
-            echo '  tpr compile PDF [COMMIT]   Compile and output to PDF'
+            echo '  tpr compile OUT [COMMIT]   Compile and output to OUT'
             echo '                               COMMIT: use commit'
             echo '  tpr validate [COMMIT]      Verify compilation'
             echo '                               COMMIT: use commit'
@@ -56,15 +56,14 @@ function tpr_help --argument cmd
             echo '  tpr remote REPONAME        Create a remote repository'
             echo '  tpr update                 Update existing project'
             echo '  tpr diff PDF COMMIT [REV]  Create diff PDF'
+            echo '                               REV: diff against commit'
             __tpr_echo_header options
+            echo '  -C/--directory           Specify working directory (default: .)'
             echo '  -h/--help                Print help and exit.'
             echo '  -V/--version                Print version and exit.'
-            echo '  -C/--directory           Specify working directory (default: .)'
             echo
             echo -n 'Run '; __tpr_echo_code 'tpr [subcommand] --help'; echo ' for more information, or visit'
-            echo -n '  '
-            __tpr_echo_url 'github.com/alexrutar/tpr'
-            echo
+            echo -n '  '; __tpr_echo_url 'github.com/alexrutar/tpr'; echo
 
         case init
             __tpr_echo_usage 'tpr init TEMPLATE'
@@ -85,7 +84,7 @@ function tpr_help --argument cmd
             echo '  Update the project in the working directory.'
 
         case compile
-            __tpr_echo_usage 'tpr compile PDF [COMMIT]'
+            __tpr_echo_usage 'tpr compile OUT [COMMIT]'
             __tpr_echo_header options
             echo '  -f/--force               Overwrite OUT.'
             echo '  -F/--format FMT          Format of the output file (default: pdf).'
@@ -166,7 +165,6 @@ function tpr_help --argument cmd
             echo
             echo '`homepage`: default homepage for your reporitory'
 
-
         case template
             __tpr_echo_header subcommands
             echo '  install NAME GIT    Install new template'
@@ -176,10 +174,7 @@ function tpr_help --argument cmd
             echo '  -h/--help                Print help and exit.'
             echo
             echo -n 'Run '; __tpr_echo_code 'tpr template [subcommand] --help'; echo ' for more information, or visit'
-            echo -n '  '
-            __tpr_echo_url 'github.com/alexrutar/tpr'
-            echo
-
+            echo -n '  '; __tpr_echo_url 'github.com/alexrutar/tpr'; echo
 
         case template-install
             __tpr_echo_usage 'tpr template install NAME GIT'
@@ -196,14 +191,12 @@ function tpr_help --argument cmd
             echo
             echo '  for more details about template creation.'
 
-
         case template-uninstall
             __tpr_echo_usage 'tpr uninstall NAME'
             __tpr_echo_header options
             echo '  -h/--help                Print help and exit.'
             __tpr_echo_header description
             echo '  Uninstall the templates with name NAME.'
-
 
         case template-update
             __tpr_echo_usage 'tpr template update'
@@ -212,15 +205,12 @@ function tpr_help --argument cmd
             __tpr_echo_header description
             echo '  Apply upstream template changes to the current project.'
 
-
         case template-list
             __tpr_echo_usage 'tpr template list'
             __tpr_echo_header options
             echo '  -h/--help                Print help and exit.'
             __tpr_echo_header description
             echo '  List all available templates. Install or update templates'
-            echo -n '  with '
-            __tpr_echo_code 'tpr install'
-            echo '.'
+            echo -n '  with '; __tpr_echo_code 'tpr install'; echo '.'
     end
 end
