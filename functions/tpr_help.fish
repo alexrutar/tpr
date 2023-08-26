@@ -84,8 +84,8 @@ function tpr_help --argument cmd
             __tpr_echo_usage 'tpr compile OUT'
             __tpr_echo_header options
             echo '  -f/--force               Overwrite OUT.'
-            echo '  -F/--format FMT          Format of the output file (default: pdf).'
-            echo '  -r/--reference REF       Use git reference REF.'
+            echo '  -F/--format=FMT          Format of the output file (default: pdf).'
+            echo '  -r/--reference=REF       Use git reference REF.'
             __tpr_echo_header description
             echo '  Compile tex file specified with .latexmain in the current directory'
             echo '  and check for errors. Output the compiled file to OUT using command'
@@ -112,7 +112,7 @@ function tpr_help --argument cmd
             __tpr_echo_usage 'tpr validate'
             __tpr_echo_header options
             echo '  -h/--help                Print help and exit.'
-            echo '  -r/--reference REF       Use git reference REF.'
+            echo '  -r/--reference=REF       Use git reference REF.'
             __tpr_echo_header description
             echo '  Compile tex file specified with .latexmain in the current'
             echo '  directory and check for errors. The command used is'
@@ -129,8 +129,8 @@ function tpr_help --argument cmd
             echo '  -h/--help                 Print help and exit.'
             echo '  -I/--include=EXTENSION    Include additional files in archive.'
             echo '  -f/--force                Overwrite OUT.'
-            echo '  -F/--format [tar|gz|dir]  Format of the archive (default: gz).'
-            echo '  -r/--reference REF       Use git reference REF.'
+            echo '  -F/--format=[tar|gz|dir]  Format of the archive (default: gz).'
+            echo '  -r/--reference=REF       Use git reference REF.'
             __tpr_echo_header description
             echo '  Export files in the current repository to the file OUT.'
             echo '  The export respects your .gitignore. Include additional files'
@@ -156,8 +156,6 @@ function tpr_help --argument cmd
             __tpr_echo_header description
             echo '  Create a new private remote GitHub repository with name'
             echo '  REPONAME. REPONAME is an identifier of the form username/repo.'
-            echo '  Create a new private repository at alexrutar/test-repo.'
-            echo '  > tpr remote alexrutar/test-repo'
             __tpr_echo_header config
             echo '  tpr reads configuration from `$XDG_CONFIG_HOME/tpr/config.toml`,'
             echo '  which is often `~/.config/tpr/config.toml`. The following keys'
