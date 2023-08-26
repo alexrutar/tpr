@@ -145,6 +145,10 @@ function tpr --description 'Initialize LaTeX project repositories' --argument co
     switch "$argv[1]"
 
         case template
+            if not type -q copier
+                __tpr_FAIL "Dependency `copier` missing: command `tpr template` not supported"; return 1
+            end
+
             # parse options and catch help
             if not argparse --stop-nonopt $options -- $argv[2..]
                 return 1
@@ -262,6 +266,9 @@ function tpr --description 'Initialize LaTeX project repositories' --argument co
 
 
         case init
+            if not type -q copier
+                __tpr_FAIL "Dependency `copier` missing: command `tpr init` not supported"; return 1
+            end
             set --local options $options (fish_opt --short=F --long=force)
             if not argparse $options -- $argv[2..]
                 return 1
@@ -302,6 +309,11 @@ function tpr --description 'Initialize LaTeX project repositories' --argument co
 
 
         case remote
+            if not type -q yq
+                and not type -q gh
+                __tpr_FAIL "Dependencies `yq` and `gh` missing: command `tpr remote` not supported"; return 1
+            end
+
             if not argparse $options -- $argv[2..]
                 return 1
             end
@@ -371,9 +383,18 @@ function tpr --description 'Initialize LaTeX project repositories' --argument co
 
             # if --bare: replace tarfile with modified contents
             if set --query _flag_bare
-                arxiv_latex_cleaner $temp_dir/source
-                rm --force $temp_dir/source_arXiv/$main_tex.latexmain
-                rm --force $temp_dir/source_arXiv/.copier-answers.yml
+                if type -q arxiv_latex_cleaner
+                    arxiv_latex_cleaner --keep_bib $temp_dir/source
+                else
+                    __tpr_WARN "Command `arxiv_latex_cleaner` not found: skipping some cleaning steps"
+                    cp -r $temp_dir/source $temp_dir/source_arXiv
+                end
+
+                set --local delete_endings \
+                    aux bcf blg brf cls fdb_latexmk fls \
+                    gz latexmain log run.xml tar thm toc zip
+                rm --force $temp_dir/source_arXiv/**/*.{$delete_endings}
+                rm --force --recursive $temp_dir/source_arXiv/{.gitignore, .git, .github, .copier-answers.yml}
 
                 rm --force $temp_dir/source.tar
                 __tpr_tar $temp_dir/source_arXiv $temp_dir/source.tar
