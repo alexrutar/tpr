@@ -80,7 +80,7 @@ function __tpr_list_templates --argument template_directory
 end
 
 
-function tpr --description 'Initialize LaTeX project repositories' --argument command
+function tpr --description 'Manage LaTeX project repositories' --argument command
     set --local options (fish_opt --short=h --long=help)
     set --local options $options (fish_opt --short=v --long=version)
     set --local options $options (fish_opt --short=C --long=directory --required-val)
@@ -406,11 +406,12 @@ function tpr --description 'Initialize LaTeX project repositories' --argument co
                 case gz
                     gzip -9 $temp_dir/source.tar
                     and mv --interactive $temp_dir/source.tar.gz $OUT
+
                 case tar
                     mv --interactive $temp_dir/source.tar $OUT
+
                 case dir
-                    if not set --query _flag_force
-                        and test -e $OUT
+                    if test -e $OUT
                         __tpr_FAIL "File or directory '$OUT' already exists. Override with --force."
                     end
                     mkdir --parents $OUT
@@ -501,6 +502,6 @@ function tpr --description 'Initialize LaTeX project repositories' --argument co
 
 
         case '*'
-            __tpr_FAIL "Unknown command: \"$argv[1]\""; return 1
+            __tpr_FAIL "Unknown command: '$argv[1]'"; return 1
     end
 end
