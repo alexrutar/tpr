@@ -41,16 +41,17 @@ function __tpr_install --on-event tpr_install
 end
 
 function __tpr_uninstall --on-event tpr_uninstall
-    functions --erase tpr
-    functions --erase tpr_help
-    functions --erase __tpr_FAIL
-    functions --erase __tpr_WARN
-    functions --erase __tpr_main_tex
-    functions --erase __tpr_compile
-    functions --erase __tpr_compile_force
-    functions --erase __tpr_tar
-    functions --erase __tpr_populate_tempdir
-    functions --erase __tpr_list_templates
-    functions --erase __tpr_install
-    functions --erase __tpr_uninstall
+    # functions/tpr.fish
+    functions --erase \
+        tpr __tpr_FAIL __tpr_WARN __tpr_main_tex __tpr_compile \
+        __tpr_compile_force __tpr_tar __tpr_populate_tempdir \
+        __tpr_list_templates
+
+    # functions/tpr_help.fish
+    functions --erase \
+        tpr_help __tpr_echo_code __tpr_echo_url __tpr_echo_header \
+        __tpr_echo_usage
+
+    # conf.d/tpr.fish
+    functions --erase __tpr_install __tpr_uninstall
 end
