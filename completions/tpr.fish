@@ -6,7 +6,7 @@ complete -c tpr -f
 
 # flags for base command
 complete -c tpr -s h -l help -d "Print help and exit"
-complete -c tpr -l version -d "Print version and exit"
+complete -c tpr -s V -l version -d "Print version and exit"
 complete -c tpr -s C -l directory -r -F -d "Specify working directory"
 
 complete -c tpr -n "not __fish_seen_subcommand_from $tpr_subcommands" -a archive -d "Export files"
