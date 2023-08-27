@@ -57,7 +57,7 @@ function tpr_help --argument cmd
             __tpr_echo_header options
             echo '  -C/--directory           Specify working directory (default: .)'
             echo '  -h/--help                Print help and exit.'
-            echo '  -V/--version                Print version and exit.'
+            echo '  -v/--version                Print version and exit.'
             echo
             echo -n 'Run '; __tpr_echo_code 'tpr [subcommand] --help'; echo ' for more information, or visit'
             echo -n '  '; __tpr_echo_url 'github.com/alexrutar/tpr'; echo
