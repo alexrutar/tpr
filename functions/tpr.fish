@@ -1,4 +1,4 @@
-function __tpr_FAIL --argument messane
+function __tpr_FAIL --argument message
     set_color red; echo -n "Error: " >&2; set_color normal
     echo $message >&2
     return 1
@@ -272,7 +272,7 @@ function tpr --description 'Manage LaTeX project repositories' --argument comman
             end
 
             set --local TEMPLATE $argv[1]
-            if not set --query TEMPLATE
+            if test -z "$TEMPLATE"
                 __tpr_missing_arg TEMPLATE; return 1
             end
 
@@ -310,7 +310,7 @@ function tpr --description 'Manage LaTeX project repositories' --argument comman
             end
 
             set --local REPONAME $argv[1]
-            if not set --query REPONAME
+            if test -z "$REPONAME"
                 __tpr_missing_arg REPONAME; return 1
             end
 
@@ -352,7 +352,7 @@ function tpr --description 'Manage LaTeX project repositories' --argument comman
             end
 
             set --function OUT $argv[1]
-            if not set --query OUT
+            if test -z "$OUT"
                 __tpr_missing_arg OUT; return 1
             end
 
@@ -427,7 +427,7 @@ function tpr --description 'Manage LaTeX project repositories' --argument comman
             end
 
             set --function PDF $argv[1]
-            if not set --query PDF
+            if test -z "$PDF"
                 __tpr_missing_arg PDF; return 1
             end
             set --function COMMIT $argv[2]
@@ -482,7 +482,7 @@ function tpr --description 'Manage LaTeX project repositories' --argument comman
             end
 
             set --local OUT $argv[1]
-            if not set --query OUT
+            if test -z "$OUT"
                 __tpr_missing_arg OUT; return 1
             end
 
