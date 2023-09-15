@@ -41,6 +41,9 @@ function __tpr_echo_usage
 end
 
 
+# TODO: create --staged option for `tpr validate` which only checks if there are changed files that would impact
+# compilation, and only validates staged files (and not changes in the current working directory)
+# possible trick: run arxiv_latex_cleaner and check if the resulting directories are different?
 function tpr_help --argument cmd
     switch $cmd
         case ''

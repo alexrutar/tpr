@@ -499,7 +499,7 @@ function tpr --description 'Manage LaTeX project repositories' --argument comman
                 set --function mv_flags --interactive
             end
 
-            if not mv $mv_flags (path change-extension $FORMAT $temp_dir/source/$main_tex) $OUT 2> /dev/null
+            if not mv $mv_flags (path change-extension $FORMAT $temp_dir/source/$main_tex 2> /dev/null) $OUT
                 __tpr_FAIL "Failed to obtain file '$(path change-extension $FORMAT $main_tex)' after compilation."; return 1
             end
 
