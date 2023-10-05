@@ -376,9 +376,14 @@ function tpr --description 'Manage LaTeX project repositories' --argument comman
                     cp -r $temp_dir/source $temp_dir/source_arXiv
                 end
 
+                # delete all hidden files
+                fd --hidden --regex "^\." --no-ignore $temp_dir/source_arXiv --exec-batch rm -rf
+
                 set --local delete_endings \
                     aux bcf blg brf fdb_latexmk fls \
-                    gz latexmain log run.xml tar thm toc toml zip
+                    gz latexmain log run.xml tar thm toc toml \
+                    yml yaml zip
+
                 rm --force $temp_dir/source_arXiv/**/*.{$delete_endings}
                 rm --force --recursive $temp_dir/source_arXiv/{.gitignore, .git, .github, .copier-answers.yml}
 
