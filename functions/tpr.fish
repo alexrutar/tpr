@@ -377,8 +377,8 @@ function tpr --description 'Manage LaTeX project repositories' --argument comman
                 end
 
                 set --local delete_endings \
-                    aux bcf blg brf cls fdb_latexmk fls \
-                    gz latexmain log run.xml tar thm toc zip
+                    aux bcf blg brf fdb_latexmk fls \
+                    gz latexmain log run.xml tar thm toc toml zip
                 rm --force $temp_dir/source_arXiv/**/*.{$delete_endings}
                 rm --force --recursive $temp_dir/source_arXiv/{.gitignore, .git, .github, .copier-answers.yml}
 
