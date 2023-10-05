@@ -45,7 +45,7 @@ function __tpr_tar --description "create an uncompressed tarfile from `source_di
     if test -f "$source_dir/.gitignore"
         set --function ignore_file --ignore-file $source_dir/.gitignore
     end
-    fd -H --exclude '.git' $ignore_file --base-directory $source_dir --print0 | xargs -0 tar -rf $tarfile -C $source_dir
+    fd -H --exclude '.git' $ignore_file --base-directory $source_dir --exec-batch tar -rf $tarfile -C $source_dir
 end
 
 
@@ -395,10 +395,11 @@ function tpr --description 'Manage LaTeX project repositories' --argument comman
             if set --query _flag_include
                 __tpr_compile_force "$temp_dir/source/$main_tex"
                 or __tpr_WARN "Compilation failed: some files may not be included."
+
                 for file_end in $_flag_include
                     set --local include_file (path change-extension $file_end $main_tex)
                     if test -f $temp_dir/source/$include_file
-                        tar -rf $temp_dir/source.tar -C $temp_dir/source (path change-extension $file_end $main_tex)
+                        tar -rf $temp_dir/source.tar -C $temp_dir/source ./$include_file
                     else
                         __tpr_WARN "File '$include_file' was not generated before or during compilation."
                     end
