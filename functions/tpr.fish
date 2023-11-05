@@ -324,7 +324,13 @@ function tpr --description 'Manage LaTeX project repositories' --argument comman
                 set --function homepage_opt --homepage $homepage
             end
 
-            gh repo create $REPONAME --remote origin --source $tpr_working_dir --disable-issues --disable-wiki --private --push $homepage_opt
+            set --function remote (yq '.remote' $tpr_config_file)
+            if test -z "$homepage"
+                set --function remote origin
+            end
+
+
+            gh repo create $REPONAME --remote $remote --source $tpr_working_dir --disable-issues --disable-wiki --private --push $homepage_opt
 
 
         case archive
