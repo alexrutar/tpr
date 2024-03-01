@@ -266,11 +266,6 @@ function tpr --description 'Manage LaTeX project repositories' --argument comman
                 tpr_help init; return 0
             end
 
-            if string length -q -- (ls -A $tpr_working_dir)
-            and not set --query _flag_force
-                __tpr_FAIL "Working directory is not empty"; return 1
-            end
-
             set --local TEMPLATE $argv[1]
             if test -z "$TEMPLATE"
                 __tpr_missing_arg TEMPLATE; return 1
