@@ -23,11 +23,14 @@ function __tpr_echo_header --argument header
         case usage
             echo 'Usage:'
         case description
-            echo; echo 'Description:'
+            echo
+            echo 'Description:'
         case options
-            echo; echo 'Options:'
+            echo
+            echo 'Options:'
         case config
-            echo; echo 'Configuration:'
+            echo
+            echo 'Configuration:'
         case subcommands
             echo 'Subcommands:'
     end
@@ -62,8 +65,12 @@ function tpr_help --argument cmd
             echo '  -h/--help                Print help and exit.'
             echo '  -v/--version                Print version and exit.'
             echo
-            echo -n 'Run '; __tpr_echo_code 'tpr [subcommand] --help'; echo ' for more information, or visit'
-            echo -n '  '; __tpr_echo_url 'github.com/alexrutar/tpr'; echo
+            echo -n 'Run '
+            __tpr_echo_code 'tpr [subcommand] --help'
+            echo ' for more information, or visit'
+            echo -n '  '
+            __tpr_echo_url 'github.com/alexrutar/tpr'
+            echo
 
         case init
             __tpr_echo_usage 'tpr init TEMPLATE'
@@ -93,14 +100,20 @@ function tpr_help --argument cmd
             echo '  Compile tex file specified with .latexmain in the current directory'
             echo '  and check for errors. Output the compiled file to OUT using command'
             echo
-            echo -n '  > '; set_color brgreen; echo -n 'latexmk -pdf -interaction=nonstopmode -silent -Werror'; set_color normal; echo
+            echo -n '  > '
+            set_color brgreen
+            echo -n 'latexmk -pdf -interaction=nonstopmode -silent -Werror'
+            set_color normal
+            echo
             echo
             echo '  If FMT is given, output the file <main_tex>.$FMT.'
             echo
             echo '  If --force is given overwrite file OUT.'
             echo
             echo '  If REF is given, use the commit specified by REF'
-            echo -n '  The REF argument is used as the argument to '; __tpr_echo_code 'git archive'; echo '.'
+            echo -n '  The REF argument is used as the argument to '
+            __tpr_echo_code 'git archive'
+            echo '.'
 
         case diff
             __tpr_echo_usage 'tpr diff PDF OLD [NEW]'
@@ -120,10 +133,16 @@ function tpr_help --argument cmd
             echo '  Compile tex file specified with .latexmain in the current'
             echo '  directory and check for errors. The command used is'
             echo
-            echo -n '  > '; set_color brgreen; echo -n 'latexmk -pdf -interaction=nonstopmode -silent -Werror'; set_color normal; echo
+            echo -n '  > '
+            set_color brgreen
+            echo -n 'latexmk -pdf -interaction=nonstopmode -silent -Werror'
+            set_color normal
+            echo
             echo
             echo '  If REF is given, use the commit specified by REF.'
-            echo -n '  The REF argument is used as the argument to '; __tpr_echo_code 'git archive'; echo '.'
+            echo -n '  The REF argument is used as the argument to '
+            __tpr_echo_code 'git archive'
+            echo '.'
 
         case archive
             __tpr_echo_usage 'tpr archive OUT'
@@ -150,7 +169,9 @@ function tpr_help --argument cmd
             echo '  If the --force option is used, delete OUT before archiving.'
             echo
             echo '  If REF is given, use the commit specified by REF.'
-            echo -n '  The REF argument is used as the argument to '; __tpr_echo_code 'git archive'; echo '.'
+            echo -n '  The REF argument is used as the argument to '
+            __tpr_echo_code 'git archive'
+            echo '.'
 
         case remote
             __tpr_echo_usage 'tpr remote REPONAME'
@@ -174,8 +195,12 @@ function tpr_help --argument cmd
             __tpr_echo_header options
             echo '  -h/--help                Print help and exit.'
             echo
-            echo -n 'Run '; __tpr_echo_code 'tpr template [subcommand] --help'; echo ' for more information, or visit'
-            echo -n '  '; __tpr_echo_url 'github.com/alexrutar/tpr'; echo
+            echo -n 'Run '
+            __tpr_echo_code 'tpr template [subcommand] --help'
+            echo ' for more information, or visit'
+            echo -n '  '
+            __tpr_echo_url 'github.com/alexrutar/tpr'
+            echo
 
         case template-install
             __tpr_echo_usage 'tpr template install NAME GIT'
@@ -184,11 +209,15 @@ function tpr_help --argument cmd
             __tpr_echo_header description
             echo '  Install new templates with name NAME from the git repository GIT.'
             echo '  This is an error if the template already exists (remove first'
-            echo -n '  with '; __tpr_echo_code "tpr template remove"; echo '.)'
+            echo -n '  with '
+            __tpr_echo_code "tpr template remove"
+            echo '.)'
             echo
             echo '  Templates for the project are rendered using copier. See'
             echo
-            echo -n '    '; __tpr_echo_url 'copier.readthedocs.io/en/stable/'; echo
+            echo -n '    '
+            __tpr_echo_url 'copier.readthedocs.io/en/stable/'
+            echo
             echo
             echo '  for more details about template creation.'
 
@@ -212,6 +241,8 @@ function tpr_help --argument cmd
             echo '  -h/--help                Print help and exit.'
             __tpr_echo_header description
             echo '  List all available templates. Install new templates'
-            echo -n '  with '; __tpr_echo_code 'tpr install'; echo '.'
+            echo -n '  with '
+            __tpr_echo_code 'tpr install'
+            echo '.'
     end
 end

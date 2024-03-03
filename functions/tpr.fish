@@ -1,17 +1,22 @@
 function __tpr_FAIL --argument message
-    set_color red; echo -n "Error: " >&2; set_color normal
+    set_color red
+    echo -n "Error: " >&2
+    set_color normal
     echo $message >&2
     return 1
 end
 
 
 function __tpr_missing_arg --argument arg_name
-    __tpr_FAIL "Missing positional argument $arg_name."; return 1
+    __tpr_FAIL "Missing positional argument $arg_name."
+    return 1
 end
 
 
 function __tpr_WARN --argument message
-    set_color yellow; echo -n "Warning: " >&2; set_color normal
+    set_color yellow
+    echo -n "Warning: " >&2
+    set_color normal
     echo $message >&2
 end
 
@@ -24,7 +29,8 @@ function __tpr_main_tex --argument tpr_working_dir
 
     if not test -f $main_tex_relative
         or not test "$main_tex_extension" = ".tex"
-        __tpr_FAIL "no valid tex file specified with .latexmain"; return 1
+        __tpr_FAIL "no valid tex file specified with .latexmain"
+        return 1
     end
 
     echo $main_tex
@@ -32,12 +38,12 @@ end
 
 
 function __tpr_compile --argument texfile
-    latexmk -pdf -interaction=nonstopmode -silent -Werror -file-line-error -cd $texfile > /dev/null
+    latexmk -pdf -interaction=nonstopmode -silent -Werror -file-line-error -cd $texfile >/dev/null
 end
 
 
 function __tpr_compile_force --argument texfile
-    latexmk -pdf -f -interaction=nonstopmode -silent -cd $texfile > /dev/null
+    latexmk -pdf -f -interaction=nonstopmode -silent -cd $texfile >/dev/null
 end
 
 
@@ -71,7 +77,8 @@ function __tpr_populate_tempdir --description "archive the current directory to 
 
     # check that archive was generated properly
     if not test -f "$temp_dir/source/$main_tex"
-        __tpr_FAIL "failed to generate archive"; return 1
+        __tpr_FAIL "failed to generate archive"
+        return 1
     end
 
     # if so, return
@@ -97,7 +104,8 @@ function tpr --description 'Manage LaTeX project repositories' --argument comman
 
     # catch help and version flags
     if set --query _flag_help
-        tpr_help; return 0
+        tpr_help
+        return 0
     end
 
     if set --query _flag_version
@@ -132,7 +140,8 @@ function tpr --description 'Manage LaTeX project repositories' --argument comman
     set --function tpr_config_file $tpr_config_dir/config.toml
 
     if test (count $argv) -eq 0
-        tpr_help; return 1
+        tpr_help
+        return 1
     end
 
     set --local temp_dir (mktemp --directory)
@@ -144,7 +153,8 @@ function tpr --description 'Manage LaTeX project repositories' --argument comman
 
         case template
             if not type -q copier
-                __tpr_FAIL "Dependency `copier` missing: command `tpr template` not supported"; return 1
+                __tpr_FAIL "Dependency `copier` missing: command `tpr template` not supported"
+                return 1
             end
 
             # parse options and catch help
@@ -152,11 +162,13 @@ function tpr --description 'Manage LaTeX project repositories' --argument comman
             or return 1
 
             if set --query _flag_help
-                tpr_help template; return 0
+                tpr_help template
+                return 0
             end
 
             if test (count $argv) -eq 0
-                tpr_help template; return 1
+                tpr_help template
+                return 1
             end
 
 
@@ -167,31 +179,36 @@ function tpr --description 'Manage LaTeX project repositories' --argument comman
                     or return 1
 
                     if set --query _flag_help
-                        tpr_help template-install; return 0
+                        tpr_help template-install
+                        return 0
                     end
 
                     set --local NAME $argv[1]
                     if not set --query NAME
-                        __tpr_missing_arg NAME; return 1
+                        __tpr_missing_arg NAME
+                        return 1
                     end
                     set --local GIT $argv[2]
                     if not set --query GIT
-                        __tpr_missing_arg GIT; return 1
+                        __tpr_missing_arg GIT
+                        return 1
                     end
 
                     # validate template name
                     set --local matched_name (string match --regex '[a-zA-Z0-9_\-]+' $NAME)
 
                     if not test "$matched_name" = "$NAME"
-                        __tpr_FAIL "Invalid template name!"; return 1
+                        __tpr_FAIL "Invalid template name!"
+                        return 1
                     end
 
                     if test -e "$tpr_template_dir/$NAME"
-                        __tpr_FAIL "Template with name $NAME already installed!"; return 1
+                        __tpr_FAIL "Template with name $NAME already installed!"
+                        return 1
                     end
 
                     # install to directory
-                    git clone $GIT "$tpr_template_dir/$NAME" > /dev/null
+                    git clone $GIT "$tpr_template_dir/$NAME" >/dev/null
 
 
                 case uninstall
@@ -200,19 +217,22 @@ function tpr --description 'Manage LaTeX project repositories' --argument comman
                     or return 1
 
                     if set --query _flag_help
-                        tpr_help template-uninstall; return 0
+                        tpr_help template-uninstall
+                        return 0
                     end
 
                     set --local NAME $argv[1]
                     if not set --query NAME
-                        __tpr_missing_arg NAME; return 1
+                        __tpr_missing_arg NAME
+                        return 1
                     end
 
                     # validate template name
                     set --local matched_name (string match --regex '[a-zA-Z0-9_\-]+' $NAME)
 
                     if not test "$matched_name" = "$NAME"
-                        __tpr_FAIL "Invalid template name!"; return 1
+                        __tpr_FAIL "Invalid template name!"
+                        return 1
                     end
 
                     if test -e "$tpr_template_dir/$NAME"
@@ -226,7 +246,8 @@ function tpr --description 'Manage LaTeX project repositories' --argument comman
                     or return 1
 
                     if set --query _flag_help
-                        tpr_help template-update; return 0
+                        tpr_help template-update
+                        return 0
                     end
 
                     for file in $tpr_template_dir/*
@@ -243,37 +264,43 @@ function tpr --description 'Manage LaTeX project repositories' --argument comman
                     or return 1
 
                     if set --query _flag_help
-                        tpr_help template-list; return 0
+                        tpr_help template-list
+                        return 0
                     end
 
                     __tpr_list_templates $tpr_template_dir
 
 
                 case '*'
-                    __tpr_FAIL "Unknown template subcommand: \"$argv[2]\""; return 1
+                    __tpr_FAIL "Unknown template subcommand: \"$argv[2]\""
+                    return 1
             end
 
 
         case init
             if not type -q copier
-                __tpr_FAIL "Dependency `copier` missing: command `tpr init` not supported"; return 1
+                __tpr_FAIL "Dependency `copier` missing: command `tpr init` not supported"
+                return 1
             end
             set --local options $options (fish_opt --short=F --long=force)
             argparse --name "tpr init" --max-args 1 $options -- $argv[2..]
             or return 1
 
             if set --query _flag_help
-                tpr_help init; return 0
+                tpr_help init
+                return 0
             end
 
             set --local TEMPLATE $argv[1]
             if test -z "$TEMPLATE"
-                __tpr_missing_arg TEMPLATE; return 1
+                __tpr_missing_arg TEMPLATE
+                return 1
             end
 
             set --function available_templates (__tpr_list_templates $tpr_template_dir)
             if not contains $TEMPLATE $available_templates
-                __tpr_FAIL "Invalid template '$TEMPLATE'"; return 1
+                __tpr_FAIL "Invalid template '$TEMPLATE'"
+                return 1
             end
 
             copier copy $tpr_template_dir/$TEMPLATE $tpr_working_dir
@@ -294,24 +321,28 @@ function tpr --description 'Manage LaTeX project repositories' --argument comman
         case remote
             if not type -q yq
                 and not type -q gh
-                __tpr_FAIL "Dependencies `yq` and `gh` missing: command `tpr remote` not supported"; return 1
+                __tpr_FAIL "Dependencies `yq` and `gh` missing: command `tpr remote` not supported"
+                return 1
             end
 
             argparse --name "tpr remote" --max-args 1 $options -- $argv[2..]
             or return 1
 
             if set --query _flag_help
-                tpr_help remote; return 0
+                tpr_help remote
+                return 0
             end
 
             set --local REPONAME $argv[1]
             if test -z "$REPONAME"
-                __tpr_missing_arg REPONAME; return 1
+                __tpr_missing_arg REPONAME
+                return 1
             end
 
 
             if git -C $tpr_working_dir config --get remote.origin.url
-                __tpr_FAIL "remote 'origin' already exists"; return 1
+                __tpr_FAIL "remote 'origin' already exists"
+                return 1
             end
 
             set --function homepage (yq '.homepage' $tpr_config_file)
@@ -339,7 +370,8 @@ function tpr --description 'Manage LaTeX project repositories' --argument comman
             or return 1
 
             if set --query _flag_help
-                tpr_help archive; return 0
+                tpr_help archive
+                return 0
             end
 
             if set --query _flag_format
@@ -354,7 +386,8 @@ function tpr --description 'Manage LaTeX project repositories' --argument comman
 
             set --function OUT $argv[1]
             if test -z "$OUT"
-                __tpr_missing_arg OUT; return 1
+                __tpr_missing_arg OUT
+                return 1
             end
 
             # if force, delete OUT
@@ -430,16 +463,19 @@ function tpr --description 'Manage LaTeX project repositories' --argument comman
             or return 1
 
             if set --query _flag_help
-                tpr_help diff; return 0
+                tpr_help diff
+                return 0
             end
 
             set --function PDF $argv[1]
             if test -z "$PDF"
-                __tpr_missing_arg PDF; return 1
+                __tpr_missing_arg PDF
+                return 1
             end
             set --function COMMIT $argv[2]
             if not set --query COMMIT
-                __tpr_missing_arg COMMIT; return 1
+                __tpr_missing_arg COMMIT
+                return 1
             end
             set --function REV $argv[3]
 
@@ -448,11 +484,12 @@ function tpr --description 'Manage LaTeX project repositories' --argument comman
 
             set --local diff_tex (path change-extension '' $temp_dir/source/$main_tex)-diff.tex
 
-            if latexdiff (git show $COMMIT:$main_tex | psub) $main_tex > $diff_tex
+            if latexdiff (git show $COMMIT:$main_tex | psub) $main_tex >$diff_tex
                 and __tpr_compile_force $diff_tex
-                mv -i  (path change-extension pdf $diff_tex) $PDF
+                mv -i (path change-extension pdf $diff_tex) $PDF
             else
-                __tpr_FAIL "Failed to compile diff file"; return 1
+                __tpr_FAIL "Failed to compile diff file"
+                return 1
             end
 
 
@@ -462,7 +499,8 @@ function tpr --description 'Manage LaTeX project repositories' --argument comman
             or return 1
 
             if set --query _flag_help
-                tpr_help validate; return 0
+                tpr_help validate
+                return 0
             end
 
             set --local main_tex (__tpr_populate_tempdir $temp_dir $tpr_working_dir $_flag_reference)
@@ -478,9 +516,10 @@ function tpr --description 'Manage LaTeX project repositories' --argument comman
             argparse --name "tpr compile" --max-args 1 $options -- $argv[2..]
             or return 1
             if set --query _flag_help
-                tpr_help compile; return 0
+                tpr_help compile
+                return 0
             end
-                
+
 
             if set --query _flag_format
                 set --function FORMAT $_flag_format
@@ -490,14 +529,16 @@ function tpr --description 'Manage LaTeX project repositories' --argument comman
 
             set --local OUT $argv[1]
             if test -z "$OUT"
-                __tpr_missing_arg OUT; return 1
+                __tpr_missing_arg OUT
+                return 1
             end
 
             set --local main_tex (__tpr_populate_tempdir $temp_dir $tpr_working_dir $_flag_reference)
             or return 1
 
             if not __tpr_compile "$temp_dir/source/$main_tex"
-                __tpr_FAIL "Failed to compile project."; return 1
+                __tpr_FAIL "Failed to compile project."
+                return 1
             end
 
             if set --query _flag_force
@@ -507,7 +548,8 @@ function tpr --description 'Manage LaTeX project repositories' --argument comman
             end
 
             if not mv $mv_flags (path change-extension $FORMAT $temp_dir/source/$main_tex 2> /dev/null) $OUT
-                __tpr_FAIL "Failed to obtain file '$(path change-extension $FORMAT $main_tex)' after compilation."; return 1
+                __tpr_FAIL "Failed to obtain file '$(path change-extension $FORMAT $main_tex)' after compilation."
+                return 1
             end
 
 
@@ -516,13 +558,15 @@ function tpr --description 'Manage LaTeX project repositories' --argument comman
             or return 1
 
             if set --query _flag_help
-                tpr_help update; return 0
+                tpr_help update
+                return 0
             end
 
             copier update $tpr_working_dir
 
 
         case '*'
-            __tpr_FAIL "Unknown command: '$argv[1]'"; return 1
+            __tpr_FAIL "Unknown command: '$argv[1]'"
+            return 1
     end
 end
