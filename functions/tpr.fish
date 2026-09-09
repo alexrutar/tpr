@@ -100,7 +100,7 @@ function tpr --description 'Manage LaTeX project repositories' --argument comman
     argparse --stop-nonopt $options -- $argv
     or return 1
 
-    set --function tpr_version 1.2
+    set --function tpr_version 1.3
 
     # catch help and version flags
     if set --query _flag_help
@@ -127,7 +127,11 @@ function tpr --description 'Manage LaTeX project repositories' --argument comman
     end
 
     if set --query _flag_directory
-        set --function tpr_working_dir $_flag_directory
+        set --function tpr_working_dir (path resolve $_flag_directory)
+        if not test -d "$tpr_working_dir"
+            __tpr_FAIL "Working directory '$_flag_directory' does not exist"
+            return 1
+        end
     else
         set --function tpr_working_dir (pwd)
     end
@@ -175,7 +179,7 @@ function tpr --description 'Manage LaTeX project repositories' --argument comman
             switch $argv[1]
                 case install
                     # parse options and catch help
-                    argparse --name "tpr template install" --max-args 2 $options -- $argv[2..]
+                    argparse --name "tpr template install" --min-args 2 --max-args 2 $options -- $argv[2..]
                     or return 1
 
                     if set --query _flag_help
@@ -213,7 +217,7 @@ function tpr --description 'Manage LaTeX project repositories' --argument comman
 
                 case uninstall
                     # parse options and catch help
-                    argparse --name "tpr template uninstall" --max-args 1 $options -- $argv[2..]
+                    argparse --name "tpr template uninstall" --min-args 1 --max-args 1 $options -- $argv[2..]
                     or return 1
 
                     if set --query _flag_help
@@ -283,7 +287,7 @@ function tpr --description 'Manage LaTeX project repositories' --argument comman
                 return 1
             end
             set --local options $options (fish_opt --short=F --long=force)
-            argparse --name "tpr init" --max-args 1 $options -- $argv[2..]
+            argparse --name "tpr init" --min-args 1 --max-args 1 $options -- $argv[2..]
             or return 1
 
             if set --query _flag_help
@@ -305,11 +309,16 @@ function tpr --description 'Manage LaTeX project repositories' --argument comman
 
             copier copy $tpr_template_dir/$TEMPLATE $tpr_working_dir
 
+            set --function first_commit_msg (yq '.first_commit_msg' $tpr_config_file)
+            if test -z "$first_commit_msg"
+                set --function init_msg first_commit_msg "Initialize new project repository"
+            end
+
             # not a git directory: initialize new repository
             if not test -d $tpr_working_dir/.git
                 git -C $tpr_working_dir init
                 and git -C $tpr_working_dir add -A
-                and git -C $tpr_working_dir commit -m "Initialize new project repository."
+                and git -C $tpr_working_dir commit -m "$first_commit_msg"
 
                 set --local commit_file $tpr_resource_dir/pre-commit
                 if test -f "$commit_file"
@@ -325,7 +334,7 @@ function tpr --description 'Manage LaTeX project repositories' --argument comman
                 return 1
             end
 
-            argparse --name "tpr remote" --max-args 1 $options -- $argv[2..]
+            argparse --name "tpr remote" --min-args 1 --max-args 1 $options -- $argv[2..]
             or return 1
 
             if set --query _flag_help
@@ -366,7 +375,7 @@ function tpr --description 'Manage LaTeX project repositories' --argument comman
             set --local options $options (fish_opt --short=f --long=force)
             set --local options $options (fish_opt --short=F --long=format --required-val)
 
-            argparse --name "tpr archive" --max-args 1 $options -- $argv[2..]
+            argparse --name "tpr archive" --min-args 1 --max-args 1 $options -- $argv[2..]
             or return 1
 
             if set --query _flag_help
@@ -459,7 +468,7 @@ function tpr --description 'Manage LaTeX project repositories' --argument comman
 
 
         case diff
-            argparse --name "tpr diff" --max-args 3 $options -- $argv[2..]
+            argparse --name "tpr diff" --min-args 2 --max-args 3 $options -- $argv[2..]
             or return 1
 
             if set --query _flag_help
@@ -550,6 +559,80 @@ function tpr --description 'Manage LaTeX project repositories' --argument comman
             if not mv $mv_flags (path change-extension $FORMAT $temp_dir/source/$main_tex 2> /dev/null) $OUT
                 __tpr_FAIL "Failed to obtain file '$(path change-extension $FORMAT $main_tex)' after compilation."
                 return 1
+            end
+
+
+        case snap
+            if not type -q yq
+                __tpr_FAIL "Dependency `yq` missing: command `tpr snap` not supported"
+                return 1
+            end
+
+            argparse --name "tpr snap" $options -- $argv[2..]
+            or return 1
+
+            if set --query _flag_help
+                tpr_help snap
+                return 0
+            end
+
+            set --local FIGURES $argv
+            if test (count $FIGURES) -eq 0
+                __tpr_missing_arg FIGURE
+                return 1
+            end
+
+            set --local snap_preamble (yq '.snap_preamble' "$tpr_config_file")
+            if test -z "$snap_preamble"
+                __tpr_FAIL "Configuration value 'snap_preamble' is empty."
+                return 1
+            end
+
+            set --local latex_search_path "$tpr_working_dir//:"
+            set --local figure_index 0
+            for FIGURE in $FIGURES
+                set figure_index (math $figure_index + 1)
+
+                if path is -a "$FIGURE"
+                    set --function figure_file (path resolve "$FIGURE")
+                else
+                    set --function figure_file (path resolve "$tpr_working_dir/$FIGURE")
+                end
+
+                if not test -f "$figure_file"
+                    __tpr_FAIL "Figure file '$FIGURE' does not exist."
+                    return 1
+                end
+
+                if not test (path extension "$figure_file") = .tex
+                    __tpr_FAIL "Figure file '$FIGURE' is not a .tex file."
+                    return 1
+                end
+
+                set --local snap_source "$temp_dir/snap-$figure_index.tex"
+                printf '%s\n' \
+                    '\documentclass{standalone}' \
+                    '\usepackage{amsmath,amssymb,amsfonts}' \
+                    '\usepackage{tikz,pgfplots}' \
+                    '\usetikzlibrary{intersections,positioning,cd,calc,bending}' \
+                    '\usetikzlibrary{decorations.markings,shapes}' \
+                    '\usetikzlibrary{arrows,arrows.meta}' \
+                    '\usetikzlibrary{patterns}' \
+                    $snap_preamble \
+                    '\begin{document}' \
+                    "\\input{$figure_file}" \
+                    '\end{document}' >$snap_source
+
+                if not env TEXINPUTS="$latex_search_path" latexmk -pdf -interaction=nonstopmode -silent -Werror -file-line-error -outdir="$temp_dir" "$snap_source" >/dev/null
+                    __tpr_FAIL "Failed to compile figure '$FIGURE'."
+                    return 1
+                end
+
+                set --local output_file (path change-extension pdf "$figure_file")
+                if not mv -f "$temp_dir/snap-$figure_index.pdf" "$output_file"
+                    __tpr_FAIL "Failed to write figure PDF '$output_file'."
+                    return 1
+                end
             end
 
 
