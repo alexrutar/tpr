@@ -6,14 +6,12 @@ function __tpr_echo_code
     echo -n '`'
 end
 
-
 function __tpr_echo_url
     set_color blue
     echo -n 'https://'
     echo -n "$argv"
     set_color normal
 end
-
 
 function __tpr_echo_header --argument header
     set_color cyan --bold
@@ -37,12 +35,10 @@ function __tpr_echo_header --argument header
     set_color normal
 end
 
-
 function __tpr_echo_usage
     __tpr_echo_header usage-nl
     echo "$argv"
 end
-
 
 # TODO: create --staged option for `tpr validate` which only checks if there are changed files that would impact
 # compilation, and only validates staged files (and not changes in the current working directory)
@@ -54,6 +50,7 @@ function tpr_help --argument cmd
             echo '  tpr init TEMPLATE        Create new project from TEMPLATE'
             echo '  tpr template ...         Subcommands for managing templates'
             echo '  tpr compile OUT          Compile and output to OUT'
+            echo '  tpr snap FIGURE ...      Compile standalone figure PDFs'
             echo '  tpr validate             Verify compilation'
             echo '  tpr archive OUT          Export files to OUT'
             echo '  tpr remote REPONAME      Create a remote repository'
@@ -89,6 +86,18 @@ function tpr_help --argument cmd
             echo '  -h/--help                Print help and exit.'
             __tpr_echo_header description
             echo '  Update the project in the working directory.'
+
+        case snap
+            __tpr_echo_usage 'tpr snap FIGURE ...'
+            __tpr_echo_header options
+            echo '  -h/--help                Print help and exit.'
+            __tpr_echo_header description
+            echo '  Compile each .tex figure to a PDF beside the source file.'
+            echo '  Relative figure paths are resolved from the working directory.'
+            echo '  Existing figure PDFs are overwritten.'
+            __tpr_echo_header config
+            echo '  Set snap_preamble to a nonempty LaTeX preamble in'
+            echo '  $XDG_CONFIG_HOME/tpr/config.toml (default: ~/.config/tpr/config.toml).'
 
         case compile
             __tpr_echo_usage 'tpr compile OUT'
@@ -166,7 +175,7 @@ function tpr_help --argument cmd
             echo '  If the dir option is specified, write output to the specified'
             echo '  directory instead.'
             echo
-            echo '  If the --force option is used, delete OUT before archiving.'
+            echo '  If the --force is set, OUT will be overwritten if it exists.'
             echo
             echo '  If REF is given, use the commit specified by REF.'
             echo -n '  The REF argument is used as the argument to '

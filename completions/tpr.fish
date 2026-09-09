@@ -14,7 +14,7 @@ function __tpr_git_commits
 end
 # END
 
-set -l tpr_subcommands init diff remote archive validate compile list template update
+set -l tpr_subcommands init diff remote archive validate compile list template update snap
 set -l tpr_template_subcommands install uninstall update
 
 # disable file completions
@@ -27,6 +27,8 @@ complete -c tpr -n "not __fish_seen_subcommand_from $tpr_subcommands" -s C -l di
 
 complete -c tpr -n "not __fish_seen_subcommand_from $tpr_subcommands" -a archive -d "Export files"
 complete -c tpr -n "not __fish_seen_subcommand_from $tpr_subcommands" -a compile -d "Compile to PDF"
+complete -c tpr -n "not __fish_seen_subcommand_from $tpr_subcommands" -a snap -d "Compile standalone figure PDFs"
+complete -c tpr -n "__fish_seen_subcommand_from snap" -F
 complete -c tpr -n "not __fish_seen_subcommand_from $tpr_subcommands" -a diff -d "Generate diff file"
 complete -c tpr -n "not __fish_seen_subcommand_from $tpr_subcommands" -a init -d "Create a new project"
 complete -c tpr -n "not __fish_seen_subcommand_from $tpr_subcommands" -a remote -d "Create a remote repository"
