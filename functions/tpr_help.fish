@@ -90,12 +90,13 @@ function tpr_help --argument cmd
             __tpr_echo_header options
             echo '  -h/--help                Print help and exit.'
             __tpr_echo_header description
-            echo '  Compile each .tex figure to a PDF beside the source file.'
-            echo '  Relative figure paths are resolved from the working directory.'
-            echo '  Existing figure PDFs are overwritten.'
+            echo '  Compile .tex files containing standalone tikzpicture environments'
+            echo '  to PDFs. The PDF  written to the same directory as the figure.'
+            echo '  Existing PDFs are overwritten.'
             __tpr_echo_header config
-            echo '  Set snap_preamble to a nonempty LaTeX preamble in'
-            echo '  $XDG_CONFIG_HOME/tpr/config.toml (default: ~/.config/tpr/config.toml).'
+            echo '  The tikz package is loaded by default. Set custom preamble using'
+            echo '  snap_preamble $XDG_CONFIG_HOME/tpr/config.toml (default:'
+            echo '  ~/.config/tpr/config.toml).'
 
         case compile
             __tpr_echo_usage 'tpr compile OUT'
