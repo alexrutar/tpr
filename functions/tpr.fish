@@ -113,6 +113,25 @@ function __tpr_list_templates --argument template_directory
     or return 0
 end
 
+function __tpr_populate_index --argument temp_dir working_dir
+    # checkout-index silently skips unmerged entries; reject them explicitly.
+    set --local unmerged (git -C "$working_dir" ls-files --unmerged -- :/)
+    or return 1
+    if test -n "$unmerged"
+        __tpr_FAIL 'Cannot use --staged with unresolved merge conflicts.'
+        return 1
+    end
+    set --local prefix (git -C "$working_dir" rev-parse --show-prefix)
+    or return 1
+    mkdir "$temp_dir/index"
+    and git -C "$working_dir" checkout-index --all --ignore-skip-worktree-bits --prefix="$temp_dir/index/"
+    or return 1
+    # checkout-index retains the repository-relative prefix when using -C.
+    command mv -- "$temp_dir/index/$prefix" "$temp_dir/source"
+    or return 1
+    __tpr_main_tex "$temp_dir/source"
+end
+
 function __tpr_with_tempdir --argument worker
     set --local temp_dir (mktemp -d)
     or return 1
@@ -237,13 +256,20 @@ function __tpr_archive --argument temp_dir working_dir output format force refer
     __tpr_publish "$artifact" "$output" "$force"
 end
 
-function __tpr_diff --argument temp_dir working_dir output old_revision new_revision
+function __tpr_diff --argument temp_dir working_dir output old_revision new_revision staged
     mkdir "$temp_dir/old" "$temp_dir/new"
     or return 1
     set --local old_main (__tpr_populate_tempdir "$temp_dir/old" "$working_dir" "$old_revision")
     or return 1
-    set --local new_main (__tpr_populate_tempdir "$temp_dir/new" "$working_dir" "$new_revision")
-    or return 1
+    set --local new_main
+    if test -n "$staged"
+        set new_main (__tpr_populate_index "$temp_dir/new" "$working_dir")
+        or return 1
+    else
+        set --local output_path (path resolve -- (path dirname -- "$output"))/(path basename -- "$output")
+        set new_main (__tpr_populate_tempdir "$temp_dir/new" "$working_dir" "$new_revision" "$temp_dir" "$output_path")
+        or return 1
+    end
     set --local diff_tex (path change-extension '' -- "$temp_dir/new/source/$new_main")-diff.tex
     latexdiff "$temp_dir/old/source/$old_main" "$temp_dir/new/source/$new_main" >"$diff_tex"
     and __tpr_compile_force "$diff_tex"
@@ -397,7 +423,8 @@ function tpr --description 'Manage LaTeX project repositories'
             set max_args 1
             set dependencies fd
         case diff
-            set operands PDF OLD
+            set --append options staged
+            set operands PDF
             set max_args 3
             set dependencies git latexdiff latexmk
         case validate
@@ -437,6 +464,21 @@ function tpr --description 'Manage LaTeX project repositories'
     if test "$max_args" -ge 0; and test (count $argv) -gt "$max_args"
         __tpr_FAIL "Too many positional arguments for '$subcommand'."
         return 1
+    end
+    if test "$subcommand" = diff
+        if set --query _flag_staged; and set --query argv[3]
+            __tpr_FAIL '--staged cannot be combined with NEW.'
+            return 1
+        end
+        for revision in $argv[2..]
+            if test -z "$revision"
+                __tpr_FAIL 'Revision arguments must not be empty.'
+                return 1
+            end
+        end
+        if not set --query _flag_staged; and not set --query argv[3]
+            set --append dependencies fd
+        end
     end
     __tpr_require $dependencies
     or return 1
@@ -554,11 +596,15 @@ function tpr --description 'Manage LaTeX project repositories'
             __tpr_with_tempdir __tpr_archive "$working_dir" "$output" "$format" "$_flag_force" "$_flag_reference" "$_flag_bare" $_flag_include
 
         case diff
-            set --local new_revision HEAD
+            set --local old_revision HEAD
+            if set --query argv[2]
+                set old_revision "$argv[2]"
+            end
+            set --local new_revision ''
             if set --query argv[3]
                 set new_revision "$argv[3]"
             end
-            __tpr_with_tempdir __tpr_diff "$working_dir" "$argv[1]" "$argv[2]" "$new_revision"
+            __tpr_with_tempdir __tpr_diff "$working_dir" "$argv[1]" "$old_revision" "$new_revision" "$_flag_staged"
 
         case compile validate
             set --local output ''

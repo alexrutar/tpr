@@ -38,6 +38,7 @@ complete -c tpr -n "not __fish_seen_subcommand_from $tpr_subcommands" -a validat
 
 # tpr {archive, compile, diff}
 complete -c tpr -n "__fish_seen_subcommand_from archive compile diff" -F
+complete -c tpr -n "__fish_seen_subcommand_from diff" -l staged -d "Compare against staged contents; cannot be combined with NEW"
 complete -c tpr -n "__fish_seen_subcommand_from archive" -s b -l bare -d "Clean export files"
 complete -c tpr -n "__fish_seen_subcommand_from archive" -rf -s I -l include -d "Include additional files"
 complete -c tpr -n "__fish_seen_subcommand_from archive compile" -s f -l force -d "Overwrite output"

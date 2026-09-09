@@ -104,11 +104,14 @@ A convenient tool for doing this is the [`latexdiff` script](https://ctan.org/pk
 The `tpr diff` tool provides a wrapper around `latexdiff` to automatically generate the diff file and compile it.
 For example
 ```fish
-tpr diff diff.pdf HEAD~3
+tpr diff diff.pdf
 ```
-creates a file `diff.pdf` showing the changes made between `HEAD~3` and `HEAD`.
-Note that the file `diff.pdf` is compiled against the project files in `HEAD`.
-This may cause compilation issues if there are substantial changes in other project files.
+creates a file `diff.pdf` showing changes between `HEAD` and the working tree.
+Use `--staged` to compare staged changes instead.
+Run `tpr diff --help` for more options.
+
+Note that the PDF is compiled using the main file and supporting files from the newer snapshot.
+This may cause compilation errors.
 
 ### Remote repository management
 You can create remote repositories on GitHub using the `tpr remote` subcommand.

@@ -40,9 +40,6 @@ function __tpr_echo_usage
     echo "$argv"
 end
 
-# TODO: create --staged option for `tpr validate` which only checks if there are changed files that would impact
-# compilation, and only validates staged files (and not changes in the current working directory)
-# possible trick: run arxiv_latex_cleaner and check if the resulting directories are different?
 function tpr_help --argument cmd
     switch $cmd
         case ''
@@ -55,8 +52,9 @@ function tpr_help --argument cmd
             echo '  tpr archive OUT          Export files to OUT'
             echo '  tpr remote REPONAME      Create a remote repository'
             echo '  tpr update               Update existing project'
-            echo '  tpr diff PDF OLD [NEW]   Create diff PDF'
-            echo '                             NEW: diff against commit'
+            echo '  tpr diff PDF [OLD [NEW]] Create diff PDF'
+            echo '                             OLD defaults to HEAD'
+            echo '                             NEW defaults to the working tree'
             __tpr_echo_header options
             echo '  -C/--directory           Specify working directory (default: .)'
             echo '  -h/--help                Print help and exit.'
@@ -125,13 +123,16 @@ function tpr_help --argument cmd
             echo '.'
 
         case diff
-            __tpr_echo_usage 'tpr diff PDF OLD [NEW]'
+            __tpr_echo_usage 'tpr diff [--staged] PDF [OLD [NEW]]'
             __tpr_echo_header options
             echo '  -h/--help                Print help and exit.'
+            echo '  --staged                 Use the Git index instead of the working tree.'
             __tpr_echo_header description
-            echo '  Create a diff PDF showing changes between OLD and HEAD.'
-            echo '  If NEW is given, instead show changes between OLD and'
-            echo '  NEW'
+            echo '  Create a diff PDF comparing OLD (default: HEAD) with the working tree.'
+            echo '  If NEW is given, compare against that revision instead.'
+            echo '  With --staged, compare against the Git index, excluding unstaged edits'
+            echo '  and untracked files. --staged cannot be combined with NEW.'
+            echo '  Compile using the main file and supporting files from the newer snapshot.'
 
         case validate
             __tpr_echo_usage 'tpr validate'
